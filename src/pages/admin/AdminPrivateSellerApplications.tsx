@@ -115,7 +115,7 @@ export default function AdminPrivateSellerApplications() {
     setBusyUserId(application.userId);
     try {
       const outcome = await decidePrivateSellerApplication(application.userId, decision, reason || undefined);
-      toast(`Private-seller application ${({ approve: 'approved', reject: 'rejected', suspend: 'suspended', revoke: 'revoked' } as const)[decision]}.`, 'success');
+      toast(`Personal account selling status: ${({ approve: 'approved', reject: 'rejected', suspend: 'suspended', revoke: 'revoked' } as const)[decision]}.`, 'success');
       // The decision is committed either way; say so honestly if public caches could not be cleared (hidden listings may stay visible until the cache expires).
       if (outcome?.visibility?.changed && outcome.visibility.cacheInvalidated === false) {
         toast('Decision saved, but public listing caches could not be refreshed. Hidden or restored listings may take a few minutes to update publicly.', 'error');
@@ -145,7 +145,7 @@ export default function AdminPrivateSellerApplications() {
         </button>
       </header>
 
-      <div className="mb-5 flex flex-wrap gap-2" role="group" aria-label="Filter private-seller applications">
+      <div className="mb-5 flex flex-wrap gap-2" role="group" aria-label="Filter personal account selling records">
         {FILTERS.map((item) => (
           <button key={item.value} type="button" onClick={() => setFilter(item.value)} aria-pressed={filter === item.value}
             className={`rounded-full border px-3 py-2 text-xs font-bold ${filter === item.value ? 'border-[#0A3340] bg-[#0A3340] text-white' : 'border-[#D7E7E4] bg-white text-[#0A3340]'}`}>

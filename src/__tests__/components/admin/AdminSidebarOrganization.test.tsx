@@ -136,3 +136,30 @@ describe('authorization behaviour is unchanged', () => {
     }
   });
 });
+
+// Route-registry completeness: every registered admin route is either in the sidebar, an alias of a sidebar destination, or listed (with an honest
+// status) in the Super Admin capability inventory, so no admin page is orphaned. No destination appears twice in the sidebar.
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { DEPARTMENT_CAPABILITIES } from '../../../features/AdminDepartmentCapabilities';
+
+describe('Admin route registry has no orphans or duplicate sidebar destinations', () => {
+  const registry = readFileSync(resolve(__dirname, '../../../components/admin/AdminRouteSurface.tsx'), 'utf8');
+  const sidebar = readFileSync(resolve(__dirname, '../../../components/admin/AdminSidebar.tsx'), 'utf8');
+  const routes = Array.from(registry.matchAll(/'(\/admin[^']*)':\s*\{/g)).map((m) => m[1]);
+  const nav = Array.from(sidebar.matchAll(/to: '(\/admin[^']*)'/g)).map((m) => m[1]);
+  const inventory = new Set(DEPARTMENT_CAPABILITIES.flatMap((d) => d.capabilities.map((c) => c.href).filter(Boolean) as string[]));
+  // Aliases / surfaces reached from the dashboard rather than the sidebar (documented in the route audit matrix).
+  const DASHBOARD_REACHED = new Set(['/admin/support', '/admin/communications', '/admin/provider-governance', '/admin/owners']);
+
+  it('lists no sidebar destination twice', () => {
+    expect(nav.filter((to, i) => nav.indexOf(to) !== i)).toEqual([]);
+  });
+  it('every registered route is reachable from the sidebar, the dashboard or the capability inventory', () => {
+    const orphans = routes.filter((r) => r !== '/admin' && !nav.includes(r) && !inventory.has(r) && !DASHBOARD_REACHED.has(r));
+    expect(orphans).toEqual([]);
+  });
+  it('every sidebar destination is a registered route', () => {
+    expect(nav.filter((to) => to !== '/admin' && !routes.includes(to))).toEqual([]);
+  });
+});

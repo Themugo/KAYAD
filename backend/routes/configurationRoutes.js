@@ -58,6 +58,8 @@ import {
   importConfig,
 } from "../controllers/configurationController.js";
 
+import { notProvisionedGuard } from "../middleware/provisioningGuard.js";
+
 const router = express.Router();
 
 // All routes require authentication
@@ -154,5 +156,7 @@ router.post("/audit/:logId/rollback", allowRoles("admin", "superadmin"), asyncHa
 
 router.get("/export", allowRoles("admin", "superadmin"), asyncHandler(exportConfig));
 router.post("/import", allowRoles("admin", "superadmin"), asyncHandler(importConfig));
+
+router.use(notProvisionedGuard("Configuration Studio"));
 
 export default router;

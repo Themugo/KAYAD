@@ -213,7 +213,7 @@ export default function AdminUsers() {
         </div>
         <div className="data-table-controls kayad-users-filters">
           <label className="kayad-users-search"><span className="kayad-users-search-icon" aria-hidden="true">⌕</span><input className="input" placeholder="Search name or email" value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} aria-label="Search users by name or email" /></label>
-          <label className="kayad-users-filter"><span>Role</span><select className="input" value={roleFilter} onChange={e => { setRoleFilter(e.target.value); setPage(1); }} aria-label="Filter by role"><option value="all">All roles</option><option value="user">Users</option><option value="dealer">Dealers</option><option value="individual_seller">Private sellers</option><option value="admin">Admins</option><option value="superadmin">Super Admins</option></select></label>
+          <label className="kayad-users-filter"><span>Role</span><select className="input" value={roleFilter} onChange={e => { setRoleFilter(e.target.value); setPage(1); }} aria-label="Filter by role"><option value="all">All roles</option><option value="user">Users</option><option value="dealer">Dealers</option><option value="individual_seller">Legacy seller accounts</option><option value="admin">Admins</option><option value="superadmin">Super Admins</option></select></label>
           <label className="kayad-users-filter"><span>Status</span><select className="input" value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }} aria-label="Filter by status"><option value="all">All statuses</option><option value="pending">Pending approval</option><option value="banned">Banned</option></select></label>
         </div>
 

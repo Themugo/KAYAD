@@ -8,6 +8,7 @@
 export type AdminFailureKind =
   | 'maintenance'
   | 'maintenance_policy'
+  | 'not_provisioned'
   | 'session'
   | 'forbidden'
   | 'missing'
@@ -43,6 +44,8 @@ const REASONS: Record<AdminFailureKind, string> = {
     'Data cannot be loaded until the maintenance scope is changed or ended; a System Owner can review it in the Panic Room.',
   maintenance_policy:
     'The server could not confirm who is allowed through the current maintenance policy (HTTP 503) and refused the request to be safe. Retry shortly.',
+  not_provisioned:
+    'This service is not provisioned in this environment: its database tables do not exist here (HTTP 503). Its data is unavailable, not zero. It needs a reviewed schema deployment before it can be used.',
   session: 'Your session was not accepted (HTTP 401). Sign in again.',
   forbidden: 'Your account is not permitted to read this data (HTTP 403).',
   missing: 'The API route or table was not found (HTTP 404). A backend or schema deployment may be missing.',
@@ -63,6 +66,7 @@ export function classifyAdminFailure(error: unknown): AdminFailure {
   const make = (kind: AdminFailureKind, retryable: boolean): AdminFailure => ({ kind, status, code, retryable, reason: REASONS[kind] });
 
   if (status === 503) {
+    if (code === 'FEATURE_NOT_PROVISIONED') return make('not_provisioned', false);
     if (code === 'MAINTENANCE_POLICY_UNAVAILABLE') return make('maintenance_policy', true);
     if (code === 'SYSTEM_MAINTENANCE' || data?.maintenance === true || /maintenance/i.test(message)) return make('maintenance', false);
     return make('server', true);

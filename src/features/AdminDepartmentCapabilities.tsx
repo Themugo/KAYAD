@@ -97,6 +97,28 @@ export const DEPARTMENT_CAPABILITIES: Department[] = [
       { name: 'Single cross-department reporting semantic model', status: 'NOT IMPLEMENTED', evidence: 'No verified shared metric definitions and cross-domain aggregation contract was found; do not calculate totals from UI samples.' },
     ],
   },
+  {
+    name: 'Specialist Studios (Super Admin)',
+    summary: 'Registered Super Admin workspaces that are not in the main sidebar. Listed here so no page is orphaned; each states what backs it.',
+    access: 'Every studio below is Super Admin only in the route registry. Studios whose database tables are not provisioned answer "not provisioned" (HTTP 503) instead of showing empty or fake data.',
+    capabilities: [
+      { name: 'Content Studio (CMS)', status: 'IMPLEMENTED BUT UNVERIFIED', evidence: 'Pages, campaigns, banners and media. Read endpoints now require a staff role; public pages, FAQs and content stay public.', href: '/admin/cms' },
+      { name: 'Automation Studio', status: 'PARTIAL', evidence: 'Workflow and automation-task tables are not provisioned in this repository; the page reports "not provisioned".', href: '/admin/automation' },
+      { name: 'Configuration Center', status: 'PARTIAL', evidence: 'Feature-flag and reference-data tables are not provisioned in this repository; statistics report "not provisioned".', href: '/admin/config' },
+      { name: 'Business Object Studio (low-code)', status: 'PARTIAL', evidence: 'Business-object tables are not provisioned in this repository; the page reports "not provisioned".', href: '/admin/lowcode' },
+      { name: 'Visual Experience Studio', status: 'PARTIAL', evidence: 'vx_* tables are not provisioned in this repository; the page reports "not provisioned".', href: '/admin/vxp' },
+      { name: 'Experience Studio', status: 'PARTIAL', evidence: 'The experiences table is not provisioned in this repository; the page reports "not provisioned".', href: '/admin/xos' },
+      { name: 'AI Platform Builder', status: 'PARTIAL', evidence: 'The predictions table is not provisioned in this repository; the page reports "not provisioned".', href: '/admin/ai' },
+      { name: 'Digital Twin Center', status: 'PARTIAL', evidence: 'The scenarios table is not provisioned in this repository; the page reports "not provisioned".', href: '/admin/digital-twin' },
+      { name: 'Enterprise Control Center', status: 'IMPLEMENTED BUT UNVERIFIED', evidence: 'Registered Super Admin workspace; opens without failed API calls in the route sweep. Workflow depth not certified.', href: '/admin/control-center' },
+      { name: 'Integration Studio', status: 'IMPLEMENTED BUT UNVERIFIED', evidence: 'Registered Super Admin workspace; opens without failed API calls in the route sweep. Workflow depth not certified.', href: '/admin/integration' },
+      { name: 'Governance Studio', status: 'IMPLEMENTED BUT UNVERIFIED', evidence: 'Registered Super Admin workspace; opens without failed API calls in the route sweep. Workflow depth not certified.', href: '/admin/governance' },
+      { name: 'Executive Intelligence Center', status: 'IMPLEMENTED BUT UNVERIFIED', evidence: 'Registered Super Admin workspace; opens without failed API calls in the route sweep. Workflow depth not certified.', href: '/admin/intelligence' },
+      { name: 'Enterprise Command Center', status: 'IMPLEMENTED BUT UNVERIFIED', evidence: 'Registered Super Admin workspace; opens without failed API calls in the route sweep. Workflow depth not certified.', href: '/admin/command-center' },
+      { name: 'Continuous Improvement Center', status: 'IMPLEMENTED BUT UNVERIFIED', evidence: 'Registered Super Admin workspace; opens without failed API calls in the route sweep. Workflow depth not certified.', href: '/admin/improvement' },
+      { name: 'Platform Factory', status: 'IMPLEMENTED BUT UNVERIFIED', evidence: 'Registered Super Admin workspace; opens without failed API calls in the route sweep. Workflow depth not certified.', href: '/admin/platform-factory' },
+    ],
+  },
 ];
 
 const STATUS_STYLE: Record<CapabilityStatus, string> = {

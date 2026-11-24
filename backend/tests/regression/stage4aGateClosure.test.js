@@ -57,14 +57,14 @@ const ledgerRouter = (await import("../../routes/ledgerRoutes.js")).default;
 
 // ---------------- G1 ----------------
 describe("G1 rejected is written by three workflows while cars_status_check forbids it (static pins)", () => {
-  // STAGE 5A: admin moderation and duplicate removal now write the supported 'hidden' status; only reportController still writes 'rejected'.
-  const fixed = ["backend/routes/adminRoutes.js", "backend/controllers/duplicateController.js"];
+  // STAGE 5A: admin moderation and duplicate removal write the supported 'hidden' status. ADMIN CONSOLE COMPLETION (2026-11-24): the report-queue
+  // takedown (reportController, the last writer) now does the same, so no workflow writes the forbidden value any more.
+  const fixed = ["backend/routes/adminRoutes.js", "backend/controllers/duplicateController.js", "backend/controllers/reportController.js"];
   test.each(fixed)("%s no longer writes status 'rejected' (Stage 5A maps negative decisions to hidden)", (f) => {
     expect(src(f)).not.toMatch(/status\s*(=|:)\s*["']rejected["']/);
   });
-  const writers = ["backend/controllers/reportController.js"];
-  test.each(writers)("%s still writes status 'rejected'", (f) => {
-    expect(src(f)).toMatch(/status\s*(=|:)\s*["']rejected["']/);
+  test("the report-queue takedown writes 'hidden', which cars_status_check admits", () => {
+    expect(src("backend/controllers/reportController.js")).toMatch(/status:\s*"hidden"/);
   });
   test("no migration in the active chain admits 'rejected' for cars.status", () => {
     const dir = path.join(repo, "supabase/migrations");

@@ -58,6 +58,8 @@ import {
   getAISuggestions,
 } from "../controllers/automationController.js";
 
+import { notProvisionedGuard } from "../middleware/provisioningGuard.js";
+
 const router = express.Router();
 
 // All routes require authentication
@@ -141,5 +143,7 @@ router.post("/scheduled", allowRoles("admin", "superadmin"), asyncHandler(create
 router.put("/scheduled/:id", validateObjectId, allowRoles("admin", "superadmin"), asyncHandler(updateScheduledJob));
 router.delete("/scheduled/:id", validateObjectId, allowRoles("admin", "superadmin"), asyncHandler(deleteScheduledJob));
 router.post("/scheduled/:id/run", validateObjectId, allowRoles("admin", "superadmin"), asyncHandler(runScheduledJobNow));
+
+router.use(notProvisionedGuard("Automation Studio"));
 
 export default router;

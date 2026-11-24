@@ -3,7 +3,7 @@ import { render, screen, cleanup, fireEvent, waitFor, within } from '@testing-li
 import { MemoryRouter } from 'react-router-dom';
 
 const api = vi.hoisted(() => ({
-  stats: vi.fn(), users: vi.fn(), cars: vi.fn(), getAuditLog: vi.fn(), toggleBan: vi.fn(), approveDealer: vi.fn(), verifyDealer: vi.fn(), moderateCar: vi.fn(), verifyCar: vi.fn(),
+  stats: vi.fn(), getStaff: vi.fn(), users: vi.fn(), cars: vi.fn(), getAuditLog: vi.fn(), toggleBan: vi.fn(), approveDealer: vi.fn(), verifyDealer: vi.fn(), moderateCar: vi.fn(), verifyCar: vi.fn(),
 }));
 vi.mock('../../api/api.exports', () => ({ adminAPI: api }));
 let authUser: any = { id: 'u1', role: 'admin', isOwner: false };
@@ -28,6 +28,7 @@ beforeEach(() => {
   api.users.mockResolvedValue({ users: [{ id: 'd1', name: 'Dealer One', email: 'd1@x.test', role: 'dealer', status: 'pending' }] });
   api.cars.mockResolvedValue({ cars: [{ id: 'c1', title: 'Pending Car', status: 'pending', price: 1000 }] });
   api.getAuditLog.mockResolvedValue({ entries: [] });
+  api.getStaff.mockResolvedValue({ staff: [] });
 });
 afterEach(() => { cleanup(); window.sessionStorage.clear(); });
 // AdminView renders inside the app's router in production (main.tsx); the department matrix uses <Link>.
@@ -487,5 +488,73 @@ describe('Command centre hero (reference design)', () => {
     const links = Array.from(screen.getByLabelText('Quick Actions').querySelectorAll('a'));
     expect(links.map((a) => a.textContent)).toEqual(['Add Staff', 'Review Dealers', 'View Vehicles', 'View Reports']);
     expect(links.map((a) => a.getAttribute('href'))).toEqual(['/admin/staff', '/admin/dealer-verifications', '/admin/cars', '/admin/reports']);
+  });
+});
+
+
+describe('Command centre — authoritative team, role and vehicle panels (no sample presented as a total)', () => {
+  const STAFF = [
+    { id: 's1', name: 'Amina Owner', email: 'a@x.test', role: 'superadmin', isBanned: false },
+    { id: 's2', name: 'Brian Mod', email: 'b@x.test', role: 'moderator', isBanned: false },
+    { id: 's3', name: 'Cate Mod', email: 'c@x.test', role: 'moderator', isBanned: false },
+    { id: 's4', name: 'Dan Accounts', email: 'd@x.test', role: 'accounts', isBanned: false },
+    { id: 's5', name: 'Eve Banned', email: 'e@x.test', role: 'hr', isBanned: true },
+  ];
+  it('Super Admin: Team Members and role counts come from the complete platform staff list, banned accounts excluded', async () => {
+    authUser = { id: 'u1', role: 'superadmin', isOwner: true };
+    api.getStaff.mockResolvedValue({ staff: STAFF });
+    mount();
+    const team = await screen.findByTestId('team-panel');
+    await waitFor(() => expect(team.textContent).toContain('Amina Owner'));
+    expect(team.textContent).toContain('Showing 3 of 4 active KAYARD platform staff');
+    expect(team.textContent).not.toContain('Eve Banned');
+    const rbac = screen.getByTestId('rbac-panel');
+    expect(rbac.textContent).toMatch(/moderator\s*2/);
+    expect(rbac.textContent).toMatch(/superadmin\s*1/);
+    expect(rbac.textContent).not.toMatch(/\bhr\s*1/);
+    expect(rbac.textContent).not.toMatch(/user sample/i);
+    expect(screen.getByTestId('rbac-scope-note').textContent).toContain('complete staff list');
+    expect(api.users).toHaveBeenCalled();
+  });
+  it('customer accounts and dealers are never shown as roles or team members', async () => {
+    authUser = { id: 'u1', role: 'superadmin', isOwner: true };
+    api.users.mockResolvedValue({ users: [{ id: 'd1', name: 'Dealer One', email: 'd1@x.test', role: 'dealer', status: 'pending' }, { id: 'p1', name: 'Personal One', email: 'p@x.test', role: 'user' }] });
+    api.getStaff.mockResolvedValue({ staff: STAFF });
+    mount();
+    const rbac = await screen.findByTestId('rbac-panel');
+    await waitFor(() => expect(rbac.textContent).toContain('moderator'));
+    expect(rbac.querySelector('.kayad-command-role-summary')!.textContent).not.toMatch(/dealer|\buser\b/i);
+    expect(screen.getByTestId('team-panel').textContent).not.toContain('Dealer One');
+  });
+  it('non-Super-Admin roles: the staff list is not requested and the panels say it is restricted (no counts)', async () => {
+    authUser = { id: 'u1', role: 'admin', isOwner: false };
+    mount();
+    await waitFor(() => expect(screen.getByTestId('team-panel').textContent).toMatch(/restricted to the Super Admin/));
+    expect(api.getStaff).not.toHaveBeenCalled();
+    expect(screen.getByTestId('rbac-scope-note').textContent).toMatch(/restricted to the Super Admin; none are shown/);
+    expect(screen.getByTestId('rbac-panel').querySelector('.kayad-command-role-summary')).toBeNull();
+  });
+  it('a failed staff request is unavailable, never an empty team or zero counts', async () => {
+    authUser = { id: 'u1', role: 'superadmin', isOwner: true };
+    api.getStaff.mockRejectedValue(Object.assign(new Error('boom'), { response: { status: 500 } }));
+    mount();
+    await waitFor(() => expect(screen.getByTestId('team-panel').textContent).toMatch(/Staff list unavailable/));
+    expect(screen.getByTestId('team-panel').textContent).not.toMatch(/No active platform staff/);
+    expect(screen.getByTestId('rbac-scope-note').textContent).toMatch(/unavailable right now; none are shown/);
+  });
+  it('an empty but successful staff list is a real empty state', async () => {
+    authUser = { id: 'u1', role: 'superadmin', isOwner: true };
+    api.getStaff.mockResolvedValue({ staff: [] });
+    mount();
+    await waitFor(() => expect(screen.getByTestId('team-panel').textContent).toMatch(/No active platform staff accounts were returned/));
+  });
+  it('Recent Vehicle Submissions states the server total, not the loaded sample size', async () => {
+    api.cars.mockResolvedValue({ cars: [{ id: 'c1', title: 'Pending Car', status: 'pending', price: 1000 }], pagination: { total: 57 } });
+    mount();
+    await waitFor(() => expect(screen.getByTestId('vehicles-scope-note').textContent).toContain('Newest 1 of 57 vehicle records (server count, newest first)'));
+  });
+  it('without a server total the panel says the total is unavailable', async () => {
+    mount();
+    await waitFor(() => expect(screen.getByTestId('vehicles-scope-note').textContent).toContain('total unavailable'));
   });
 });

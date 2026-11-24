@@ -10,6 +10,7 @@ import { placeBid, getAuctionBids, confirmBidPayment, endAuction, getMyBids } fr
 
 import Bid from "../models/Bid.js";
 import { closeAuction } from "../services/auctionClose.service.js";
+import { isMissingDatabaseObject } from "../middleware/provisioningGuard.js";
 
 const router = express.Router();
 
@@ -120,12 +121,25 @@ router.get(
   protect,
   adminOnly,
   asyncHandler(async (req, res) => {
-    const bids = await Bid.find({ isSuspicious: true })
-      .populate("user", "name email")
-      .populate("carId", "title")
-      .sort({ createdAt: -1 })
-      .limit(100)
-      .lean();
+    // Nothing in this repository writes bids.is_suspicious and the column is not in supabase/migrations: the flagging
+    // pipeline (fraud_detections storage) is not provisioned. Say so (503) instead of a generic 500 or a fake empty queue.
+    let bids;
+    try {
+      bids = await Bid.find({ isSuspicious: true })
+        .populate("user", "name email")
+        .populate("carId", "title")
+        .sort({ createdAt: -1 })
+        .limit(100)
+        .lean();
+    } catch (err) {
+      if (!isMissingDatabaseObject(err)) throw err;
+      return res.status(503).json({
+        success: false,
+        code: "FEATURE_NOT_PROVISIONED",
+        feature: "Suspicious-bid flagging",
+        message: "Suspicious-bid flagging is not provisioned in this environment (no bid flag storage exists). The queue is unavailable, not empty.",
+      });
+    }
 
     res.json({
       success: true,

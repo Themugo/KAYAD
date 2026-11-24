@@ -6,10 +6,10 @@
   "shell": true,
   "heading": "Welcome back, James Mugo",
   "overflow": false,
-  "restricted": false,
+  "restricted": true,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 3354,
+  "textLen": 3526,
   "pageErrors": 0,
   "consoleErrors": 4,
   "failedApi": []
@@ -24,7 +24,7 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 1509,
+  "textLen": 1516,
   "pageErrors": 0,
   "consoleErrors": 4,
   "failedApi": []
@@ -69,7 +69,7 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 1407,
+  "textLen": 1415,
   "pageErrors": 0,
   "consoleErrors": 4,
   "failedApi": []
@@ -114,11 +114,11 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 470,
+  "textLen": 591,
   "pageErrors": 0,
   "consoleErrors": 5,
   "failedApi": [
-   "500 /api/bids/admin/suspicious"
+   "503 /api/bids/admin/suspicious"
   ]
  },
  {
@@ -191,12 +191,10 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 352,
+  "textLen": 301,
   "pageErrors": 0,
-  "consoleErrors": 6,
-  "failedApi": [
-   "500 /api/reports/admin/all"
-  ]
+  "consoleErrors": 4,
+  "failedApi": []
  },
  {
   "who": "superadmin",
@@ -223,12 +221,10 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 277,
+  "textLen": 267,
   "pageErrors": 0,
-  "consoleErrors": 6,
-  "failedApi": [
-   "500 /api/feedback/admin/all"
-  ]
+  "consoleErrors": 4,
+  "failedApi": []
  },
  {
   "who": "superadmin",
@@ -240,12 +236,10 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 188,
+  "textLen": 153,
   "pageErrors": 0,
-  "consoleErrors": 6,
-  "failedApi": [
-   "500 /api/admin/market-data"
-  ]
+  "consoleErrors": 4,
+  "failedApi": []
  },
  {
   "who": "superadmin",
@@ -272,12 +266,10 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 597,
+  "textLen": 579,
   "pageErrors": 0,
-  "consoleErrors": 6,
-  "failedApi": [
-   "500 /api/ntsa-verification"
-  ]
+  "consoleErrors": 4,
+  "failedApi": []
  },
  {
   "who": "superadmin",
@@ -334,7 +326,7 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 1466,
+  "textLen": 2682,
   "pageErrors": 0,
   "consoleErrors": 5,
   "failedApi": []
@@ -364,12 +356,10 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 612,
+  "textLen": 608,
   "pageErrors": 0,
-  "consoleErrors": 6,
-  "failedApi": [
-   "500 /api/announcements"
-  ]
+  "consoleErrors": 4,
+  "failedApi": []
  },
  {
   "who": "superadmin",
@@ -393,10 +383,10 @@
   "shell": true,
   "heading": "Operations Control Room",
   "overflow": false,
-  "restricted": false,
+  "restricted": true,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 1383,
+  "textLen": 1699,
   "pageErrors": 0,
   "consoleErrors": 4,
   "failedApi": []
@@ -516,7 +506,7 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 1371,
+  "textLen": 1447,
   "pageErrors": 0,
   "consoleErrors": 4,
   "failedApi": []
@@ -550,8 +540,8 @@
   "pageErrors": 0,
   "consoleErrors": 12,
   "failedApi": [
-   "500 /api/automation/stats",
-   "500 /api/automation/workflows"
+   "503 /api/automation/stats",
+   "503 /api/automation/workflows"
   ]
  },
  {
@@ -568,7 +558,7 @@
   "pageErrors": 0,
   "consoleErrors": 8,
   "failedApi": [
-   "500 /api/config/stats"
+   "503 /api/config/stats"
   ]
  },
  {
@@ -585,7 +575,7 @@
   "pageErrors": 0,
   "consoleErrors": 8,
   "failedApi": [
-   "500 /api/lowcode/stats"
+   "503 /api/lowcode/stats"
   ]
  },
  {
@@ -602,7 +592,7 @@
   "pageErrors": 0,
   "consoleErrors": 8,
   "failedApi": [
-   "500 /api/vxp/stats"
+   "503 /api/vxp/stats"
   ]
  },
  {
@@ -619,7 +609,7 @@
   "pageErrors": 0,
   "consoleErrors": 8,
   "failedApi": [
-   "500 /api/xos/dashboard"
+   "503 /api/xos/dashboard"
   ]
  },
  {
@@ -636,7 +626,7 @@
   "pageErrors": 0,
   "consoleErrors": 8,
   "failedApi": [
-   "500 /api/ai/dashboard"
+   "503 /api/ai/dashboard"
   ]
  },
  {
@@ -653,7 +643,7 @@
   "pageErrors": 0,
   "consoleErrors": 8,
   "failedApi": [
-   "500 /api/digital-twin/dashboard"
+   "503 /api/digital-twin/dashboard"
   ]
  },
  {
@@ -666,7 +656,7 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 612,
+  "textLen": 614,
   "pageErrors": 0,
   "consoleErrors": 4,
   "failedApi": []
@@ -828,10 +818,10 @@
   "shell": true,
   "heading": "Welcome back, James Mugo",
   "overflow": false,
-  "restricted": false,
+  "restricted": true,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 3352,
+  "textLen": 3530,
   "pageErrors": 0,
   "consoleErrors": 4,
   "failedApi": []
@@ -846,7 +836,7 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 1503,
+  "textLen": 1510,
   "pageErrors": 0,
   "consoleErrors": 4,
   "failedApi": []
@@ -891,7 +881,7 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 1401,
+  "textLen": 1409,
   "pageErrors": 0,
   "consoleErrors": 4,
   "failedApi": []
@@ -936,11 +926,11 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 464,
+  "textLen": 585,
   "pageErrors": 0,
   "consoleErrors": 5,
   "failedApi": [
-   "500 /api/bids/admin/suspicious"
+   "503 /api/bids/admin/suspicious"
   ]
  },
  {
@@ -1013,12 +1003,10 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 346,
+  "textLen": 295,
   "pageErrors": 0,
-  "consoleErrors": 6,
-  "failedApi": [
-   "500 /api/reports/admin/all"
-  ]
+  "consoleErrors": 4,
+  "failedApi": []
  },
  {
   "who": "superadmin",
@@ -1045,12 +1033,10 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 271,
+  "textLen": 261,
   "pageErrors": 0,
-  "consoleErrors": 6,
-  "failedApi": [
-   "500 /api/feedback/admin/all"
-  ]
+  "consoleErrors": 4,
+  "failedApi": []
  },
  {
   "who": "superadmin",
@@ -1062,12 +1048,10 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 182,
+  "textLen": 147,
   "pageErrors": 0,
-  "consoleErrors": 6,
-  "failedApi": [
-   "500 /api/admin/market-data"
-  ]
+  "consoleErrors": 4,
+  "failedApi": []
  },
  {
   "who": "superadmin",
@@ -1094,12 +1078,10 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 591,
+  "textLen": 573,
   "pageErrors": 0,
-  "consoleErrors": 6,
-  "failedApi": [
-   "500 /api/ntsa-verification"
-  ]
+  "consoleErrors": 4,
+  "failedApi": []
  },
  {
   "who": "superadmin",
@@ -1156,7 +1138,7 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 1460,
+  "textLen": 2676,
   "pageErrors": 0,
   "consoleErrors": 5,
   "failedApi": []
@@ -1186,12 +1168,10 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 606,
+  "textLen": 602,
   "pageErrors": 0,
-  "consoleErrors": 6,
-  "failedApi": [
-   "500 /api/announcements"
-  ]
+  "consoleErrors": 4,
+  "failedApi": []
  },
  {
   "who": "superadmin",
@@ -1215,10 +1195,10 @@
   "shell": true,
   "heading": "Operations Control Room",
   "overflow": false,
-  "restricted": false,
+  "restricted": true,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 1376,
+  "textLen": 1694,
   "pageErrors": 0,
   "consoleErrors": 4,
   "failedApi": []
@@ -1338,7 +1318,7 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 1365,
+  "textLen": 1441,
   "pageErrors": 0,
   "consoleErrors": 4,
   "failedApi": []
@@ -1372,8 +1352,8 @@
   "pageErrors": 0,
   "consoleErrors": 12,
   "failedApi": [
-   "500 /api/automation/stats",
-   "500 /api/automation/workflows"
+   "503 /api/automation/stats",
+   "503 /api/automation/workflows"
   ]
  },
  {
@@ -1390,7 +1370,7 @@
   "pageErrors": 0,
   "consoleErrors": 8,
   "failedApi": [
-   "500 /api/config/stats"
+   "503 /api/config/stats"
   ]
  },
  {
@@ -1407,7 +1387,7 @@
   "pageErrors": 0,
   "consoleErrors": 8,
   "failedApi": [
-   "500 /api/lowcode/stats"
+   "503 /api/lowcode/stats"
   ]
  },
  {
@@ -1424,7 +1404,7 @@
   "pageErrors": 0,
   "consoleErrors": 8,
   "failedApi": [
-   "500 /api/vxp/stats"
+   "503 /api/vxp/stats"
   ]
  },
  {
@@ -1441,7 +1421,7 @@
   "pageErrors": 0,
   "consoleErrors": 8,
   "failedApi": [
-   "500 /api/xos/dashboard"
+   "503 /api/xos/dashboard"
   ]
  },
  {
@@ -1458,7 +1438,7 @@
   "pageErrors": 0,
   "consoleErrors": 8,
   "failedApi": [
-   "500 /api/ai/dashboard"
+   "503 /api/ai/dashboard"
   ]
  },
  {
@@ -1475,7 +1455,7 @@
   "pageErrors": 0,
   "consoleErrors": 8,
   "failedApi": [
-   "500 /api/digital-twin/dashboard"
+   "503 /api/digital-twin/dashboard"
   ]
  },
  {
@@ -1488,7 +1468,7 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 607,
+  "textLen": 606,
   "pageErrors": 0,
   "consoleErrors": 4,
   "failedApi": []
@@ -1650,10 +1630,10 @@
   "shell": true,
   "heading": "Welcome back, Journey bmod",
   "overflow": false,
-  "restricted": false,
+  "restricted": true,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 2859,
+  "textLen": 2808,
   "pageErrors": 0,
   "consoleErrors": 6,
   "failedApi": [
@@ -1670,7 +1650,7 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 896,
+  "textLen": 903,
   "pageErrors": 0,
   "consoleErrors": 8,
   "failedApi": [
@@ -1842,12 +1822,10 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 352,
+  "textLen": 301,
   "pageErrors": 0,
-  "consoleErrors": 6,
-  "failedApi": [
-   "500 /api/reports/admin/all"
-  ]
+  "consoleErrors": 4,
+  "failedApi": []
  },
  {
   "who": "moderator",
@@ -1864,8 +1842,8 @@
   "consoleErrors": 7,
   "failedApi": [
    "403 /api/support/staff/queue",
-   "403 /api/support/staff/metrics",
-   "403 /api/support/staff/team"
+   "403 /api/support/staff/team",
+   "403 /api/support/staff/metrics"
   ]
  },
  {
@@ -1989,7 +1967,7 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 1952,
+  "textLen": 2682,
   "pageErrors": 0,
   "consoleErrors": 5,
   "failedApi": []
@@ -2207,8 +2185,8 @@
   "pageErrors": 0,
   "consoleErrors": 12,
   "failedApi": [
-   "500 /api/automation/stats",
-   "500 /api/automation/workflows"
+   "503 /api/automation/stats",
+   "503 /api/automation/workflows"
   ]
  },
  {
@@ -2437,9 +2415,9 @@
   "pageErrors": 0,
   "consoleErrors": 14,
   "failedApi": [
+   "403 /api/communications/admin/templates",
    "403 /api/communications/admin/analytics",
    "403 /api/communications/admin/provider-health",
-   "403 /api/communications/admin/templates",
    "403 /api/communications/admin/rollout",
    "403 /api/communications/admin/history"
   ]
@@ -2490,7 +2468,7 @@
   "restricted": true,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 2789,
+  "textLen": 2808,
   "pageErrors": 0,
   "consoleErrors": 6,
   "failedApi": [
@@ -2507,7 +2485,7 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 890,
+  "textLen": 897,
   "pageErrors": 0,
   "consoleErrors": 8,
   "failedApi": [
@@ -2679,12 +2657,10 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 346,
+  "textLen": 295,
   "pageErrors": 0,
-  "consoleErrors": 6,
-  "failedApi": [
-   "500 /api/reports/admin/all"
-  ]
+  "consoleErrors": 4,
+  "failedApi": []
  },
  {
   "who": "moderator",
@@ -2826,7 +2802,7 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 2972,
+  "textLen": 2676,
   "pageErrors": 0,
   "consoleErrors": 5,
   "failedApi": []
@@ -3044,8 +3020,8 @@
   "pageErrors": 0,
   "consoleErrors": 12,
   "failedApi": [
-   "500 /api/automation/stats",
-   "500 /api/automation/workflows"
+   "503 /api/automation/stats",
+   "503 /api/automation/workflows"
   ]
  },
  {
@@ -3276,8 +3252,8 @@
   "failedApi": [
    "403 /api/communications/admin/templates",
    "403 /api/communications/admin/analytics",
-   "403 /api/communications/admin/provider-health",
    "403 /api/communications/admin/history",
+   "403 /api/communications/admin/provider-health",
    "403 /api/communications/admin/rollout"
   ]
  },
@@ -3312,8 +3288,8 @@
   "pageErrors": 0,
   "consoleErrors": 7,
   "failedApi": [
-   "403 /api/support/staff/queue",
    "403 /api/support/staff/metrics",
+   "403 /api/support/staff/queue",
    "403 /api/support/staff/team"
   ]
  }

@@ -1,5 +1,5 @@
 import express from "express";
-import { protect, allowRoles } from "../middleware/auth.js";
+import { protect, adminOnly, allowRoles } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
 import { faqPopularityLimiter } from "../middleware/rateLimiter.js";
@@ -86,7 +86,12 @@ router.get("/faqs/:id", validateObjectId, asyncHandler(getFaqById));
 router.post("/faqs/:id/popularity", faqPopularityLimiter, validateObjectId, asyncHandler(incrementFaqPopularity));
 
 // Protected routes (require authentication)
-router.use(protect);
+// Everything below is Content Studio data (draft pages, campaigns, banners, media, revisions, A/B tests, analytics). Public rendering only uses
+// the routes ABOVE (published pages by slug, content, FAQs, analytics tracking). Every consumer of the routes below is under /admin/cms, and the
+// roles that may write here (admin, superadmin; "editor"/"publisher"/"creator" are not roles in this platform) are all staff. Reads were open to
+// ANY signed-in account, so a buyer could list drafts and unreleased campaigns with ?status=draft. Same staff gate the Automation router received
+// in Phase 15; writes keep their stricter allowRoles lists.
+router.use(protect, adminOnly);
 
 // Dashboard
 router.get("/dashboard/stats", asyncHandler(getDashboardStats));

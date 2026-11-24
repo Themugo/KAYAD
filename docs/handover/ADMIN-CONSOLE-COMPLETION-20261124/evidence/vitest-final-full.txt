@@ -1,0 +1,10 @@
+
+ RUN  v4.1.11 /home/claude/p12
+
+Not implemented: navigation to another Document
+
+ Test Files  230 passed (230)
+      Tests  1993 passed | 1 skipped (1994)
+   Start at  09:52:31
+   Duration  380.32s (transform 11.07s, setup 23.79s, import 38.12s, tests 149.00s, environment 138.89s)
+

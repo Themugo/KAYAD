@@ -146,8 +146,9 @@ export default function AdminSecurityLog() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
               <div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Total Security Logs</div>
-                <div style={{ fontSize: 24, fontWeight: 600, color: 'var(--brand)' }}>{statistics.total ?? 0}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>Critical events: {statistics.criticalCount ?? 0}</div>
+                <div style={{ fontSize: 24, fontWeight: 600, color: 'var(--brand)' }}>{Number.isFinite(statistics.total) ? statistics.total : 'unavailable'}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>Critical events: {Number.isFinite(statistics.criticalCount) ? statistics.criticalCount : 'unavailable'}</div>
+                {statistics.source === 'audit_logs_fallback' && <div data-testid="security-summary-source" style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>Read from the canonical audit log (security log table not provisioned). Top actions cover the latest 2,000 entries; the critical count cannot be derived and is unavailable.</div>}
               </div>
               <div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Top Actions</div>

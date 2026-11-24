@@ -53,6 +53,8 @@ import {
   getPlatformStats,
 } from "../controllers/lowCodeController.js";
 
+import { notProvisionedGuard } from "../middleware/provisioningGuard.js";
+
 const router = express.Router();
 
 // All routes require authentication
@@ -142,5 +144,7 @@ router.post("/versions/:versionId/rollback", allowRoles("admin", "superadmin"), 
 // ============================================
 
 router.post("/ai/suggest", asyncHandler(suggestBusinessObject));
+
+router.use(notProvisionedGuard("Low-code Studio"));
 
 export default router;

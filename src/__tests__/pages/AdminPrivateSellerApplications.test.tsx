@@ -48,7 +48,7 @@ describe('admin private-seller application review', () => {
     getPrivateSellerApplications.mockResolvedValue([]);
     render(<AdminPrivateSellerApplications />);
     await screen.findByText('No applications in this view');
-    const group = screen.getByRole('group', { name: 'Filter private-seller applications' });
+    const group = screen.getByRole('group', { name: 'Filter personal account selling records' });
     expect(within(group).getByRole('button', { name: 'Pending' }).getAttribute('aria-pressed')).toBe('true');
     fireEvent.click(within(group).getByRole('button', { name: 'Suspended' }));
     await waitFor(() => expect(getPrivateSellerApplications).toHaveBeenLastCalledWith('suspended'));
@@ -72,7 +72,7 @@ describe('admin private-seller application review', () => {
     fireEvent.change(await screen.findByLabelText(/Decision reason/), { target: { value: 'Vehicle ownership documents required' } });
     fireEvent.click(screen.getByRole('button', { name: 'Reject' }));
     await waitFor(() => expect(decidePrivateSellerApplication).toHaveBeenCalledWith(pending.userId, 'reject', 'Vehicle ownership documents required'));
-    expect(toast).toHaveBeenCalledWith('Private-seller application rejected.', 'success');
+    expect(toast).toHaveBeenCalledWith('Personal account selling status: rejected.', 'success');
     await waitFor(() => expect(getPrivateSellerApplications).toHaveBeenCalledTimes(2));
     expect(await screen.findByText('No applications in this view')).toBeTruthy();
   });
@@ -83,7 +83,7 @@ describe('admin private-seller application review', () => {
     render(<AdminPrivateSellerApplications />);
     fireEvent.click(await screen.findByRole('button', { name: 'Approve' }));
     await waitFor(() => expect(decidePrivateSellerApplication).toHaveBeenCalledWith(pending.userId, 'approve', undefined));
-    expect(toast).toHaveBeenCalledWith('Private-seller application approved.', 'success');
+    expect(toast).toHaveBeenCalledWith('Personal account selling status: approved.', 'success');
     await waitFor(() => expect(getPrivateSellerApplications).toHaveBeenCalledTimes(2));
   });
 

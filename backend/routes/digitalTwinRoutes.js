@@ -28,6 +28,8 @@ import {
   whatIfAnalysis,
 } from "../controllers/digitalTwinController.js";
 
+import { notProvisionedGuard } from "../middleware/provisioningGuard.js";
+
 const router = express.Router();
 
 // All routes require authentication
@@ -72,5 +74,7 @@ router.post("/predictions", asyncHandler(generatePrediction));
 // ============================================
 
 router.post("/what-if", asyncHandler(whatIfAnalysis));
+
+router.use(notProvisionedGuard("Digital Twin"));
 
 export default router;

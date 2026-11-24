@@ -119,6 +119,7 @@ router.post(
       }
     }
 
+    const previousStatus = request.status;
     request.status = status;
     request.reviewedBy = req.user.id;
     request.reviewedAt = new Date();
@@ -130,14 +131,26 @@ router.post(
     await request.save();
 
     if (status === "passed") {
-      const carUpdate = await Car.findByIdAndUpdate(request.car, {
-        ntsaVerified: true,
-        logbookVerified: request.logbookVerified === true,
-        dutyStatus: request.dutyStatus,
-        verifiedBy: req.user.id,
-      });
+      // The reviewer is recorded on the request row (ntsa_verification_requests.reviewed_by / reviewed_at). cars has no verified_by column
+      // (neither in the repository migrations nor on the hosted catalog), so writing it made every approval answer 500 AFTER the request had been
+      // saved as final ("passed" is terminal), leaving a passed request on an unverified car that could not be retried. Only real columns are written,
+      // and if the listing update still fails the request is returned to its previous open state so the decision can be retried.
+      let carUpdate = null;
+      try {
+        carUpdate = await Car.findByIdAndUpdate(request.car, {
+          ntsaVerified: true,
+          logbookVerified: request.logbookVerified === true,
+          dutyStatus: request.dutyStatus,
+        });
+      } catch (err) {
+        request.status = previousStatus;
+        await request.save();
+        throw err;
+      }
       if (!carUpdate) {
-        return res.status(404).json({ success: false, message: "Verification was saved but the associated car could not be updated; investigate before retrying" });
+        request.status = previousStatus;
+        await request.save();
+        return res.status(404).json({ success: false, message: "The associated car could not be updated; the request was returned to its previous state so it can be retried" });
       }
     }
 

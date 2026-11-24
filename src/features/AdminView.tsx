@@ -140,6 +140,9 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
   const isOwner = (sessionUser as { isOwner?: boolean } | null)?.isOwner === true; // display only — the server enforces owner authority on every call
   const [stats, setStats] = useState<AdminStats>({});
   const [users, setUsers] = useState<AdminUser[]>([]);
+  // Complete KAYARD platform staff list (Super Admin only). null = not loaded (restricted, unavailable or loading); never an empty guess.
+  const [carsTotal, setCarsTotal] = useState<number | null>(null);
+  const [staffList, setStaffList] = useState<AdminUser[] | null>(null);
   // A separate server-filtered preview prevents pending dealers beyond the first
   // general users page from disappearing from the command-centre queue.
   const [pendingDealerUsers, setPendingDealerUsers] = useState<AdminUser[]>([]);
@@ -174,6 +177,8 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
   // Sources that failed to load (not denied): lets each panel say "unavailable" for itself instead of looking empty.
   const [failedSources, setFailedSources] = useState<string[]>([]);
   const down = (key: string) => failedSources.some((f) => f.startsWith(key));
+  const activeStaffList = useMemo(() => (staffList ?? []).filter((u: any) => !u.isBanned), [staffList]);
+  const staffRoleCounts = useMemo(() => Object.entries(activeStaffList.reduce<Record<string, number>>((acc, u: any) => { const role = String(u.role || '').trim(); if (role) acc[role] = (acc[role] || 0) + 1; return acc; }, {})).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])), [activeStaffList]);
   const [failedVehicleImages, setFailedVehicleImages] = useState<string[]>([]);
   const [lastCheckedAt, setLastCheckedAt] = useState<Date | null>(null);
   const [autoSyncEnabled, setAutoSyncEnabled] = useState(true);
@@ -198,13 +203,14 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
       canOpen('/admin/users') ? adminAPI.users({ page: 1, limit: 50, search: searchTerm.trim() || undefined, ...(activeQueue === 'pendingDealers' ? { role: 'dealer', pendingApproval: true } : {}) }) : Promise.reject({ response: { status: 403 } }),
       canOpen('/admin/cars') ? adminAPI.cars({ page: 1, limit: 50, search: searchTerm.trim() || undefined, ...(activeQueue === 'pendingVehicles' ? { status: 'pending' } : {}) }) : Promise.reject({ response: { status: 403 } }),
       canOpen('/admin/security-log') ? adminAPI.getAuditLog({ page: 1, limit: 25 }) : Promise.reject({ response: { status: 403 } }),
+      canOpen('/admin/staff') ? adminAPI.getStaff() : Promise.resolve(null), // Super Admin only: other roles skip it (expected, not a degraded source)
     ] as const);
 
     if (sequence !== loadSequence.current) return;
 
     const failures: string[] = [];
     const denied: string[] = [];
-    const [statsResult, pendingDealersResult, usersResult, carsResult, auditResult] = results;
+    const [statsResult, pendingDealersResult, usersResult, carsResult, auditResult, staffResult] = results;
     const isDenied = (r: PromiseSettledResult<unknown>) => r.status === 'rejected' && (r.reason as any)?.response?.status === 403;
     const causes = new Set<FailureCause>();
     const note = (r: PromiseSettledResult<unknown>, label: string, failLabel: string) => {
@@ -265,6 +271,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
       const payload = unwrap<any>(carsResult.value);
       if (Array.isArray(payload?.cars)) {
         setCars(payload.cars.map((c: any) => ({ ...c, _id: c._id ?? c.id })));
+        setCarsTotal(Number.isSafeInteger(payload?.pagination?.total) && payload.pagination.total >= 0 ? payload.pagination.total : null);
       } else {
         noteInvalid('vehicle records (invalid response)');
       }
@@ -280,12 +287,22 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
     } else {
       note(auditResult, 'audit log', 'audit log');
     }
+    if (staffResult.status === 'fulfilled' && staffResult.value === null) {
+      setStaffList(null);
+    } else if (staffResult.status === 'fulfilled') {
+      const payload = unwrap<any>(staffResult.value);
+      if (Array.isArray(payload?.staff)) setStaffList(payload.staff.map((u: any) => ({ ...u, _id: u._id ?? u.id })));
+      else { setStaffList(null); noteInvalid('staff list (invalid response)'); }
+    } else {
+      setStaffList(null);
+      note(staffResult, 'staff list', 'staff list');
+    }
     setRestricted(denied);
     setFailedSources(failures);
     setLastCheckedAt(new Date());
 
     setError(failures.length
-      ? `Some operational data sources are unavailable: ${failures.join(', ')}. ${causes.size ? `Cause: ${Array.from(causes).map((c) => CAUSE_TEXT[c]).join('; ')}. ` : ''}${failures.length < 5 ? 'Other successful results remain available.' : ''}`.trim()
+      ? `Some operational data sources are unavailable: ${failures.join(', ')}. ${causes.size ? `Cause: ${Array.from(causes).map((c) => CAUSE_TEXT[c]).join('; ')}. ` : ''}${failures.length < 6 ? 'Other successful results remain available.' : ''}`.trim()
       : null);
     setLoading(false);
   };
@@ -547,6 +564,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
               <header><h2 id="recent-submissions-heading">Recent Vehicle Submissions</h2>{canOpen('/admin/cars') && <Link to="/admin/cars">View All</Link>}</header>
               <div className="kayad-command-vehicles">
                 {cars.slice(0, 4).map(car => { const firstImage = car.images?.[0]; const imageUrl = (typeof firstImage === 'string' ? firstImage : firstImage?.thumb || firstImage?.url) || car.imageUrl || car.image; return <div key={car._id} className="kayad-command-vehicle"><div className="kayad-command-vehicle-art">{imageUrl && !failedVehicleImages.includes(`${car._id}:${imageUrl}`) ? <img src={imageUrl} alt={car.title || 'Vehicle submission'} loading="lazy" onError={() => setFailedVehicleImages((current) => current.includes(`${car._id}:${imageUrl}`) ? current : [...current, `${car._id}:${imageUrl}`])} /> : <Car size={32} aria-hidden="true" />}</div><strong>{car.title || 'Untitled vehicle'}</strong><small>{car.year ? `${car.year} · ` : ''}{typeof car.price === 'number' ? `KES ${car.price.toLocaleString()}` : 'Price not provided'}</small><span>{car.status || 'Status unavailable'}</span></div>; })}
+                {cars.length > 0 && <p className="kayad-command-data-note" data-testid="vehicles-scope-note">{carsTotal !== null ? `Newest ${Math.min(4, cars.length)} of ${carsTotal} vehicle record${carsTotal === 1 ? '' : 's'} (server count, newest first)` : `Newest ${Math.min(4, cars.length)} loaded vehicle records (total unavailable)`}{(search.trim() || queue === 'pendingVehicles') ? ' matching the current filter' : ''}.</p>}
                 {!cars.length && <p className="kayad-command-empty">{loading ? 'Loading submissions…' : restricted.includes('vehicle records') ? 'Vehicle records are restricted for this role.' : down('vehicle records') ? 'Vehicle records unavailable.' : 'No vehicle submissions in the loaded records.'}</p>}
               </div>
             </section>
@@ -584,8 +602,8 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
                 <p className="kayad-command-empty">{loading ? 'Loading audit activity…' : restricted.includes('audit log') ? 'Audit activity is restricted for this role.' : down('audit log') ? 'Audit activity is unavailable right now. This is not a confirmation that nothing happened.' : 'No audit activity was returned.'}</p>
               )}
             </section>
-            <section className="kayad-command-panel" aria-labelledby="team-heading"><header><h2 id="team-heading">Team Members</h2>{canOpen('/admin/staff') && <Link to="/admin/staff">View All</Link>}</header>{users.filter(u => ['superadmin','admin','moderator','marketing','technical_support','hr','accounts','escrow_officer','ad_manager','ghost_checker'].includes((u.role || '').toLowerCase())).slice(0, 3).map(u => <div className="kayad-command-team-row" key={u._id}><span className="kayad-command-team-avatar">{(u.name || u.email || 'S').charAt(0).toUpperCase()}</span><div><strong>{u.name || 'Staff member'}</strong><small>{u.role || 'Staff role unavailable'}</small></div></div>)}{!users.some(u => ['superadmin','admin','moderator','marketing','technical_support','hr','accounts','escrow_officer','ad_manager','ghost_checker'].includes((u.role || '').toLowerCase())) && <p className="kayad-command-empty">{loading ? 'Loading team records…' : restricted.includes('user records') ? 'Team records are restricted for this role.' : down('user records') ? 'Team records may be unavailable. Open staff management for the authoritative list.' : 'No staff accounts found in the current user sample. Open staff management for the authoritative list.'}</p>}{canOpen('/admin/staff') && <Link className="kayad-command-inline-link" to="/admin/staff">Manage staff <ChevronRight size={14}/></Link>}</section>
-            <section className="kayad-command-panel" aria-labelledby="rbac-heading"><header><h2 id="rbac-heading">Role-Based Access Control</h2><Link to="/admin/staff-permissions">Manage Roles</Link></header><div className="kayad-command-role-summary">{Array.from(new Set<string>(users.map(u => (u.role || '').trim()).filter((role): role is string => Boolean(role)))).slice(0, 4).map((role: string) => <div key={role}><span>{role.replace(/_/g, ' ')}</span><b>{users.filter(u => (u.role || '').trim() === role).length}</b></div>)}</div><p className="kayad-command-data-note">{restricted.includes('user records') ? 'Role membership is restricted for this role; no counts are available here.' : 'Counts reflect only the current loaded user sample, not total role membership.'}</p><Link className="kayad-command-inline-link" to="/admin/staff-permissions">Review permissions <ChevronRight size={14}/></Link></section>
+            <section className="kayad-command-panel" aria-labelledby="team-heading" data-testid="team-panel"><header><h2 id="team-heading">Team Members</h2>{canOpen('/admin/staff') && <Link to="/admin/staff">View All</Link>}</header>{activeStaffList.slice(0, 3).map(u => <div className="kayad-command-team-row" key={u._id}><span className="kayad-command-team-avatar">{(u.name || u.email || 'S').charAt(0).toUpperCase()}</span><div><strong>{u.name || 'Staff member'}</strong><small>{String(u.role || 'Staff role unavailable').replace(/_/g, ' ')}</small></div></div>)}{staffList && activeStaffList.length > 0 && <p className="kayad-command-data-note" data-testid="team-scope-note">Showing {Math.min(3, activeStaffList.length)} of {activeStaffList.length} active KAYARD platform staff (complete staff list). Dealership team members are managed by their dealerships and are not shown here.</p>}{!staffList && <p className="kayad-command-empty">{loading ? 'Loading team records…' : !canOpen('/admin/staff') ? 'The platform staff list is restricted to the Super Admin.' : down('staff list') ? 'Staff list unavailable. Open staff management for the authoritative list.' : 'Platform staff list not loaded.'}</p>}{staffList && !activeStaffList.length && <p className="kayad-command-empty">No active platform staff accounts were returned.</p>}{canOpen('/admin/staff') && <Link className="kayad-command-inline-link" to="/admin/staff">Manage staff <ChevronRight size={14}/></Link>}</section>
+            <section className="kayad-command-panel" aria-labelledby="rbac-heading" data-testid="rbac-panel"><header><h2 id="rbac-heading">Role-Based Access Control</h2><Link to="/admin/staff-permissions">Manage Roles</Link></header>{staffList ? <div className="kayad-command-role-summary">{staffRoleCounts.slice(0, 4).map(([role, count]) => <div key={role}><span>{role.replace(/_/g, ' ')}</span><b>{count}</b></div>)}</div> : null}<p className="kayad-command-data-note" data-testid="rbac-scope-note">{staffList ? `Active KAYARD platform staff by role, from the complete staff list${staffRoleCounts.length > 4 ? ` (top 4 of ${staffRoleCounts.length} roles shown)` : ''}. Customer, dealer and dealership team accounts are not roles here.` : !canOpen('/admin/staff') ? 'Role membership counts are restricted to the Super Admin; none are shown here.' : loading ? 'Loading role membership…' : 'Role membership counts are unavailable right now; none are shown.'}</p><Link className="kayad-command-inline-link" to="/admin/staff-permissions">Review permissions <ChevronRight size={14}/></Link></section>
           </div>
           <aside className="kayad-command-rail" aria-label="Account and system information" data-testid="admin-right-rail">
             <section className="kayad-command-panel kayad-command-rail-panel" aria-labelledby="right-rail-account-heading">

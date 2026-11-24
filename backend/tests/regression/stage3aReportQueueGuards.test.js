@@ -19,6 +19,10 @@ const sel = (v) => ({ select: async () => v, then: (r, j) => Promise.resolve(v).
 jest.unstable_mockModule("../../models/Report.js", () => ({ default: { findById: jest.fn(async () => (report ? { ...report, save: reportSave } : null)) } }));
 jest.unstable_mockModule("../../models/Car.js", () => ({ default: { findById: jest.fn(async (id) => cars[id] ?? null), findByIdAndUpdate: carUpdate } }));
 jest.unstable_mockModule("../../models/User.js", () => ({ default: { findById: jest.fn((id) => sel(users[id] ?? null)), findByIdAndUpdate: userUpdate } }));
+const lifecycle = jest.fn(async () => ({}));
+const invalidate = jest.fn(async () => {});
+jest.unstable_mockModule("../../services/personalListingLifecycle.service.js", () => ({ recordModerationListingLifecycle: lifecycle }));
+jest.unstable_mockModule("../../utils/publicListingCache.js", () => ({ invalidatePublicListingCaches: invalidate }));
 jest.unstable_mockModule("../../utils/logger.js", () => ({ logInfo: jest.fn(), logWarn: jest.fn(), logError: jest.fn() }));
 
 const { updateReportStatus } = await import("../../controllers/reportController.js");
@@ -31,8 +35,8 @@ const act = async (actionTaken, targetType, targetId) => {
   return res;
 };
 beforeEach(() => {
-  reportSave.mockClear(); carUpdate.mockClear(); userUpdate.mockClear();
-  cars = { sold: { id: "sold", status: "sold", sold: true }, live: { id: "live", status: "available" } };
+  reportSave.mockClear(); carUpdate.mockClear(); userUpdate.mockClear(); lifecycle.mockClear(); invalidate.mockClear(); carUpdate.mockImplementation(async () => ({}));
+  cars = { sold: { id: "sold", status: "sold", sold: true }, live: { id: "live", status: "available", dealer: "seller-1" } };
   users = { admin: { email: "a@example.test", role: "admin" }, owner: { email: "owner@example.test", role: "user" }, buyer: { email: "b@example.test", role: "user" }, mod2: { email: "m@example.test", role: "moderator" } };
 });
 
@@ -44,10 +48,19 @@ describe("S3A-G2-01 listing_removed", () => {
     expect(reportSave).not.toHaveBeenCalled();
     expect(carUpdate).not.toHaveBeenCalled();
   });
-  test("live listing → removed as before (status 'rejected')", async () => {
+  test("live listing → hidden (cars_status_check has no 'rejected'): lifecycle event, cache invalidation, then the report is saved", async () => {
     const res = await act("listing_removed", "listing", "live");
     expect(res.code).toBe(200);
-    expect(carUpdate).toHaveBeenCalledWith("live", { status: "rejected" });
+    expect(carUpdate).toHaveBeenCalledWith("live", { status: "hidden" });
+    expect(lifecycle).toHaveBeenCalledWith(expect.objectContaining({ carId: "live", sellerId: "seller-1", actorId: "mod-1", previousStatus: "available", nextStatus: "hidden" }));
+    expect(invalidate).toHaveBeenCalledTimes(1);
+    expect(reportSave).toHaveBeenCalledTimes(1);
+  });
+  test("a failed listing takedown does NOT leave the report saved as action_taken", async () => {
+    carUpdate.mockImplementationOnce(async () => { throw new Error("db failure"); });
+    const res = await act("listing_removed", "listing", "live");
+    expect(res.code).toBe(500);
+    expect(reportSave).not.toHaveBeenCalled();
   });
 });
 

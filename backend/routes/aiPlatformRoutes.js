@@ -42,6 +42,8 @@ import {
   getCommandTemplates,
 } from "../controllers/aiPlatformController.js";
 
+import { notProvisionedGuard } from "../middleware/provisioningGuard.js";
+
 const router = express.Router();
 
 // All routes require authentication
@@ -99,5 +101,7 @@ router.get("/workspaces", asyncHandler(getWorkspaces));
 router.post("/workspaces", allowRoles("admin", "superadmin"), asyncHandler(createWorkspace));
 router.put("/workspaces/:id", allowRoles("admin", "superadmin"), asyncHandler(updateWorkspace));
 router.delete("/workspaces/:id", allowRoles("admin", "superadmin"), asyncHandler(deleteWorkspace));
+
+router.use(notProvisionedGuard("AI Platform"));
 
 export default router;

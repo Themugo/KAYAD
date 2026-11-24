@@ -208,6 +208,75 @@
  },
  {
   "group": "layout",
+  "name": "1100px: command centre rendered",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "layout",
+  "name": "1100px: no horizontal overflow",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "hero",
+  "name": "1100px: hero starts within 40px of the header (no dead space above)",
+  "ok": true,
+  "detail": {
+   "heroTop": 74,
+   "heroH": 369.953125,
+   "heroW": 816,
+   "headerBottom": 58,
+   "contentTop": 58,
+   "visual": false
+  }
+ },
+ {
+  "group": "hero",
+  "name": "1100px: hero height is proportionate (<= 440px)",
+  "ok": true,
+  "detail": {
+   "heroTop": 74,
+   "heroH": 369.953125,
+   "heroW": 816,
+   "headerBottom": 58,
+   "contentTop": 58,
+   "visual": false
+  }
+ },
+ {
+  "group": "hero",
+  "name": "1100px: showroom visual hidden when stacked",
+  "ok": true,
+  "detail": {
+   "heroTop": 74,
+   "heroH": 369.953125,
+   "heroW": 816,
+   "headerBottom": 58,
+   "contentTop": 58,
+   "visual": false
+  }
+ },
+ {
+  "group": "hero",
+  "name": "1100px: Quick Actions present (4)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "health",
+  "name": "1100px: no page errors",
+  "ok": true,
+  "detail": []
+ },
+ {
+  "group": "health",
+  "name": "1100px: no failed API calls",
+  "ok": true,
+  "detail": []
+ },
+ {
+  "group": "layout",
   "name": "1180px: command centre rendered",
   "ok": true,
   "detail": ""
@@ -272,75 +341,6 @@
  {
   "group": "health",
   "name": "1180px: no failed API calls",
-  "ok": true,
-  "detail": []
- },
- {
-  "group": "layout",
-  "name": "1280px: command centre rendered",
-  "ok": true,
-  "detail": ""
- },
- {
-  "group": "layout",
-  "name": "1280px: no horizontal overflow",
-  "ok": true,
-  "detail": ""
- },
- {
-  "group": "hero",
-  "name": "1280px: hero starts within 40px of the header (no dead space above)",
-  "ok": true,
-  "detail": {
-   "heroTop": 74,
-   "heroH": 220.046875,
-   "heroW": 996,
-   "headerBottom": 58,
-   "contentTop": 58,
-   "visual": true
-  }
- },
- {
-  "group": "hero",
-  "name": "1280px: hero height is proportionate (<= 300px)",
-  "ok": true,
-  "detail": {
-   "heroTop": 74,
-   "heroH": 220.046875,
-   "heroW": 996,
-   "headerBottom": 58,
-   "contentTop": 58,
-   "visual": true
-  }
- },
- {
-  "group": "hero",
-  "name": "1280px: showroom visual shown",
-  "ok": true,
-  "detail": {
-   "heroTop": 74,
-   "heroH": 220.046875,
-   "heroW": 996,
-   "headerBottom": 58,
-   "contentTop": 58,
-   "visual": true
-  }
- },
- {
-  "group": "hero",
-  "name": "1280px: Quick Actions present (4)",
-  "ok": true,
-  "detail": ""
- },
- {
-  "group": "health",
-  "name": "1280px: no page errors",
-  "ok": true,
-  "detail": []
- },
- {
-  "group": "health",
-  "name": "1280px: no failed API calls",
   "ok": true,
   "detail": []
  },

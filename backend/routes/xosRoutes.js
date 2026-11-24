@@ -62,6 +62,8 @@ import {
   resolveExperience,
 } from "../controllers/xosController.js";
 
+import { notProvisionedGuard } from "../middleware/provisioningGuard.js";
+
 const router = express.Router();
 
 // All routes require authentication
@@ -164,5 +166,7 @@ router.get("/ai/recommendations", asyncHandler(getAIRecommendations));
 // ============================================
 
 router.get("/resolve", asyncHandler(resolveExperience));
+
+router.use(notProvisionedGuard("Experience Studio"));
 
 export default router;

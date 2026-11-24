@@ -4,6 +4,8 @@ import asyncHandler from '../middleware/asyncHandler.js';
 import { requirePublicListingParam } from '../middleware/publicListingVisibility.js'; // Phase 13I
 import { aiDecisionService } from '../ai/services/aiDecisionService.js';
 
+import { notProvisionedGuard } from "../middleware/provisioningGuard.js";
+
 const router = express.Router();
 router.use(protect);
 
@@ -24,5 +26,7 @@ router.get('/market-signals', asyncHandler(async (req, res) => {
   const result = await aiDecisionService.marketSignals(req.query);
   res.json({ success: true, data: result });
 }));
+
+router.use(notProvisionedGuard("AI Decisions"));
 
 export default router;

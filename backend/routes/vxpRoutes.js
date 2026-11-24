@@ -52,6 +52,8 @@ import {
   aiDesignAssist,
 } from "../controllers/vxpController.js";
 
+import { notProvisionedGuard } from "../middleware/provisioningGuard.js";
+
 const router = express.Router();
 
 // All routes require authentication
@@ -136,5 +138,7 @@ router.post("/versions/:id/rollback", allowRoles("admin", "superadmin"), asyncHa
 // ============================================
 
 router.post("/ai/design", asyncHandler(aiDesignAssist));
+
+router.use(notProvisionedGuard("VXP Studio"));
 
 export default router;

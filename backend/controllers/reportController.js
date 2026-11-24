@@ -7,6 +7,8 @@ import Report from "../models/Report.js";
 import Car from "../models/Car.js";
 import User from "../models/User.js";
 import { moderationBlockedReason } from "../utils/carModerationGuard.js";
+import { invalidatePublicListingCaches } from "../utils/publicListingCache.js";
+import { recordModerationListingLifecycle } from "../services/personalListingLifecycle.service.js";
 import { STAFF_ROLES } from "../config/roles.js";
 import { isOwnerAccountEmail } from "../config/owners.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
@@ -273,6 +275,22 @@ export const updateReportStatus = async (req, res) => {
       }
     }
 
+    // Enforcement runs BEFORE the report is persisted: if it fails nothing is recorded as "action taken". The listing action is the SAME
+    // takedown the listing-moderation endpoint performs: cars.status 'hidden' (the cars_status_check has no 'rejected' value, so the
+    // previous write answered 500 AFTER the report had already been saved as action_taken), a moderation lifecycle event so the seller
+    // cannot simply republish, and public cache invalidation.
+    if (actionTaken === "listing_removed" && report.targetType === "listing") {
+      const targetCar = await Car.findById(report.targetId);
+      const sellerId = targetCar && (typeof targetCar.dealer === "string" ? targetCar.dealer : targetCar.dealer?.id ?? targetCar.dealer?._id);
+      if (sellerId) await recordModerationListingLifecycle({ carId: report.targetId, sellerId, actorId: req.user.id, previousStatus: targetCar.status, nextStatus: "hidden" });
+      await Car.findByIdAndUpdate(report.targetId, { status: "hidden" });
+      await invalidatePublicListingCaches();
+    }
+
+    if (actionTaken === "user_banned") {
+      await User.findByIdAndUpdate(report.targetId, { isBanned: true });
+    }
+
     if (status) report.status = status;
     if (resolution) report.resolution = resolution;
     if (actionTaken) report.actionTaken = actionTaken;
@@ -280,15 +298,6 @@ export const updateReportStatus = async (req, res) => {
     report.reviewedAt = new Date();
 
     await report.save();
-
-    // Execute action based on actionTaken
-    if (actionTaken === "listing_removed" && report.targetType === "listing") {
-      await Car.findByIdAndUpdate(report.targetId, { status: "rejected" });
-    }
-
-    if (actionTaken === "user_banned") {
-      await User.findByIdAndUpdate(report.targetId, { isBanned: true });
-    }
 
     logInfo("Report status updated", {
       reportId: id,
