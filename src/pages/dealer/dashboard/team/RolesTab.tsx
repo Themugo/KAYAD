@@ -18,6 +18,7 @@ export default function RolesTab({ roles, permDefs, customAvailable, team, reloa
   const [notice, setNotice] = useState<string | null>(null);
   const [roleBusy, setRoleBusy] = useState(false);
   const [deleteKey, setDeleteKey] = useState<string | null>(null);
+  const [resetKey, setResetKey] = useState<string | null>(null);
   const counts = (key: string) => team.filter((m) => m.role === key && ['active', 'suspended'].includes(m.status)).length;
 
   const saveRole = async (e: React.FormEvent) => {
@@ -29,11 +30,20 @@ export default function RolesTab({ roles, permDefs, customAvailable, team, reloa
       const body = { label: draft.label.trim(), description: draft.description.trim(), permissions: draft.permissions };
       const res: any = draft.key ? await dealerApi.updateTeamRole(draft.key, body) : await dealerApi.createTeamRole(body);
       if (res?.success === false) { setRoleError(res.message || 'The role could not be saved.'); return; }
-      setNotice(draft.key ? `Role “${body.label}” updated${res?.updatedMembers ? `; ${res.updatedMembers} member${res.updatedMembers === 1 ? '' : 's'} now have the new permissions` : ''}.` : `Role “${body.label}” created.`);
+      setNotice(draft.key ? `Role “${body.label}” updated${res?.updatedMembers ? `; ${res.updatedMembers} member${res.updatedMembers === 1 ? '' : 's'} now have the new permissions` : ''}${res?.keptCustom ? `. ${res.keptCustom} member${res.keptCustom === 1 ? '' : 's'} with individually adjusted access kept their own permissions` : ''}.` : `Role “${body.label}” created.`);
       setDraft(null);
       await reloadRoles();
       onChanged();
     } catch (err) { setRoleError(actionError(err)); } finally { setRoleBusy(false); }
+  };
+  const resetRole = async (key: string) => {
+    setRoleBusy(true); setRoleError(null); setNotice(null);
+    try {
+      const res: any = await dealerApi.resetTeamRole(key);
+      if (res?.success === false) { setRoleError(res.message || 'The role could not be reset.'); return; }
+      setNotice(`Role reset to its default permissions${res?.updatedMembers ? `; ${res.updatedMembers} member${res.updatedMembers === 1 ? '' : 's'} updated` : ''}.`); setResetKey(null);
+      await reloadRoles(); onChanged();
+    } catch (err) { setRoleError(actionError(err)); setResetKey(null); } finally { setRoleBusy(false); }
   };
   const removeRole = async (key: string) => {
     setRoleBusy(true); setRoleError(null); setNotice(null);
@@ -47,7 +57,7 @@ export default function RolesTab({ roles, permDefs, customAvailable, team, reloa
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-[#475569]">A role is a set of permissions. New employees start with <strong>Basic Staff Access</strong>; you then assign an operational role. Built-in roles are fixed; create your own for how your dealership really works. Changing a custom role’s permissions updates everyone already in it.</p>
+      <p className="text-sm text-[#475569]">A role is a set of permissions. New employees start with <strong>Basic Staff Access</strong>; you then assign an operational role. You can edit any role (including the built-in ones) or create your own, and you can also adjust any one person’s access from their staff details. Changing a role updates everyone in it, except people whose access you adjusted individually. Basic Staff Access is the fixed starting level and cannot be changed.</p>
       {!customAvailable && (
         <p role="status" className="p-3 rounded-lg bg-[#FFF4D6] border border-[#F2D58A] text-sm text-[#7A4B00]"><ShieldCheck className="inline w-4 h-4 mr-1" aria-hidden="true" />Custom roles are not switched on yet: the platform database needs the “dealer team custom roles” update. Built-in roles keep working.</p>
       )}
@@ -59,21 +69,30 @@ export default function RolesTab({ roles, permDefs, customAvailable, team, reloa
           <li key={r.key} className="p-4 bg-[#F6FAF9] rounded-xl">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="min-w-0">
-                <p className="font-medium text-[#0A3340]">{r.label} <span className="ml-1 px-2 py-0.5 rounded-full text-[10px] bg-[#EEF7F5] text-[#475569]">{r.onboarding ? 'Onboarding level' : r.builtin ? 'Built-in' : 'Custom'}</span> <span className="ml-1 text-xs text-[#64748B]" data-testid={`role-count-${r.key}`}>{counts(r.key)} member{counts(r.key) === 1 ? '' : 's'}</span></p>
+                <p className="font-medium text-[#0A3340]">{r.label} <span className="ml-1 px-2 py-0.5 rounded-full text-[10px] bg-[#EEF7F5] text-[#475569]">{r.onboarding ? 'Onboarding level' : r.builtin ? (r.customised ? 'Built-in · customised' : 'Built-in') : 'Custom'}</span> <span className="ml-1 text-xs text-[#64748B]" data-testid={`role-count-${r.key}`}>{counts(r.key)} member{counts(r.key) === 1 ? '' : 's'}</span></p>
                 {r.description && <p className="text-xs text-[#475569]">{r.description}</p>}
                 <p className="text-xs text-[#475569] mt-1">{summarize(r.permissions, permDefs)}</p>
+                {r.onboarding && <p className="text-[11px] text-[#64748B] mt-1">Fixed starting level. Grant extra access to a person from their staff details.</p>}
               </div>
-              {!r.builtin && (
-                <div className="flex gap-2">
+              {!r.locked && !r.onboarding && (
+                <div className="flex flex-wrap gap-2">
                   <button type="button" className={btnCls} onClick={() => { setRoleError(null); setDraft({ key: r.key, label: r.label, description: r.description || '', permissions: { ...r.permissions } }); }} aria-label={`Edit role ${r.label}`}>Edit</button>
-                  {deleteKey === r.key ? (
+                  {r.builtin && r.customised && (resetKey === r.key ? (
+                    <>
+                      <button type="button" className={btnCls} disabled={roleBusy} onClick={() => resetRole(r.key)}>Confirm reset</button>
+                      <button type="button" className={btnCls} onClick={() => setResetKey(null)}>Keep</button>
+                    </>
+                  ) : (
+                    <button type="button" className={btnCls} onClick={() => setResetKey(r.key)} aria-label={`Reset role ${r.label} to default`}>Reset to default</button>
+                  ))}
+                  {!r.builtin && (deleteKey === r.key ? (
                     <>
                       <button type="button" className={`${btnCls} !text-[#B42318]`} disabled={roleBusy} onClick={() => removeRole(r.key)}>Confirm delete</button>
                       <button type="button" className={btnCls} onClick={() => setDeleteKey(null)}>Keep</button>
                     </>
                   ) : (
                     <button type="button" className={btnCls} onClick={() => setDeleteKey(r.key)} aria-label={`Delete role ${r.label}`}>Delete</button>
-                  )}
+                  ))}
                 </div>
               )}
             </div>
@@ -131,7 +150,7 @@ export default function RolesTab({ roles, permDefs, customAvailable, team, reloa
         <h4 className="flex items-center gap-2 text-sm font-bold"><Lock size={14} aria-hidden="true" /> Always protected</h4>
         <ul className="mt-2 list-disc pl-5 space-y-1 text-xs text-[#475569]">
           <li>The dealership <strong>Owner</strong> is a protected role: full control, cannot be created, edited or removed here, and no role (including Manager) inherits ownership.</li>
-          <li>Only the owner can create, edit or delete roles, promote someone to Manager, or change a Manager.</li>
+          <li>Only the owner can create, edit, reset or delete roles, promote someone to Manager, or change a Manager. Every change is recorded.</li>
           <li>Nobody can change their own role, permissions or status, and a person can only hand out permissions they hold themselves.</li>
           <li>Banking, payouts, subscription and payment settings stay with the owner account; no role can delegate them.</li>
         </ul>

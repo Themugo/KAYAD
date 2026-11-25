@@ -28,7 +28,7 @@ import { logAuditEvent } from "../services/auditService.js";
 import crypto from "crypto";
 import { sellerMayPublishDirectly } from "../services/onboardingPolicy.service.js"; // listing self-publication
 import { sendTeamInviteEmail, sendTeamAcceptedEmail } from "../services/email.service.js";
-import { PERMISSION_LABELS, listRoles, resolveRole, createCustomRole, updateCustomRole, deleteCustomRole, RoleError, newInviteToken } from "../services/dealerTeamRoles.service.js";
+import { PERMISSION_LABELS, listRoles, resolveRole, createCustomRole, updateCustomRole, resetBuiltinRole, deleteCustomRole, RoleError, newInviteToken } from "../services/dealerTeamRoles.service.js";
 import { formatPhone } from "../utils/format.js";
 import { bulkChangeDealerListingStatus } from "../services/dealerListingSale.service.js";
 import { TEMPORARY_DUTY_PERMISSIONS, MAX_DUTY_DAYS, DutyError, validateGrant, listGrants, createGrant, revokeGrant } from "../services/dealerTemporaryDuties.service.js";
@@ -879,20 +879,41 @@ export async function createTeamRole(req, res) {
     return res.status(201).json({ success: true, data: role });
   } catch (err) { if (roleError(res, err)) return; throw err; }
 }
+// Members already in a role pick up the role's new permissions, except people whose access the owner has adjusted individually
+// (their permissions no longer match the role's previous set): those keep what the owner gave them.
+async function propagateRolePermissions(dealerId, roleKey, previous, next) {
+  const members = await findAll("dealer_teams", { filters: { dealer: dealerId, role: roleKey }, limit: 500 });
+  const same = (a, b) => { const x = grantedKeys(a).sort().join("|"); return x === grantedKeys(b).sort().join("|"); };
+  let updatedMembers = 0; let keptCustom = 0;
+  for (const m of members) {
+    if (m.status === "removed") continue;
+    if (!same(m.permissions, previous)) { keptCustom += 1; continue; }
+    await update("dealer_teams", m.id, { permissions: { ...next } });
+    updatedMembers += 1;
+  }
+  return { updatedMembers, keptCustom };
+}
 export async function updateTeamRole(req, res) {
   if (ownerOnlyRoles(req, res)) return;
   try {
     const dealerId = req.dealerId || req.user.id;
     const role = await updateCustomRole(dealerId, req.params.roleKey, req.body || {});
-    // Members already in this role pick up the new permission set, so editing a role really changes what they can do.
-    let updatedMembers = 0;
-    if (req.body?.permissions !== undefined) {
-      const members = await findAll("dealer_teams", { filters: { dealer: dealerId, role: role.key }, limit: 500 });
-      for (const m of members) { if (m.status !== "removed") { await update("dealer_teams", m.id, { permissions: { ...role.permissions } }); updatedMembers += 1; } }
-    }
-    await logAuditEvent({ action: "dealer_team_role_updated", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: role.id, targetModel: "DealerTeamRole", oldValue: role.previousPermissions, newValue: { ...role, updatedMembers }, ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
+    let counts = { updatedMembers: 0, keptCustom: 0 };
+    if (req.body?.permissions !== undefined) counts = await propagateRolePermissions(dealerId, role.key, role.previousPermissions, role.permissions);
+    await logAuditEvent({ action: "dealer_team_role_updated", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: role.id, targetModel: "DealerTeamRole", oldValue: role.previousPermissions, newValue: { ...role, ...counts }, ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
     const { previousPermissions, ...publicRole } = role; // eslint-disable-line no-unused-vars
-    return res.json({ success: true, data: publicRole, updatedMembers });
+    return res.json({ success: true, data: publicRole, ...counts });
+  } catch (err) { if (roleError(res, err)) return; throw err; }
+}
+export async function resetTeamRole(req, res) {
+  if (ownerOnlyRoles(req, res)) return;
+  try {
+    const dealerId = req.dealerId || req.user.id;
+    const role = await resetBuiltinRole(dealerId, req.params.roleKey);
+    const counts = await propagateRolePermissions(dealerId, role.key, role.previousPermissions, role.permissions);
+    await logAuditEvent({ action: "dealer_team_role_reset", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: dealerId, targetModel: "DealerTeamRole", oldValue: role.previousPermissions, newValue: { key: role.key, ...counts }, ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
+    const { previousPermissions, ...publicRole } = role; // eslint-disable-line no-unused-vars
+    return res.json({ success: true, data: publicRole, ...counts });
   } catch (err) { if (roleError(res, err)) return; throw err; }
 }
 export async function deleteTeamRole(req, res) {

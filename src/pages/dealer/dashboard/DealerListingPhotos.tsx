@@ -1,11 +1,10 @@
 import React, { useRef, useState } from 'react';
-import { Loader2, Trash2, Upload, AlertCircle, Star, X } from 'lucide-react';
+import { Loader2, Trash2, Upload, AlertCircle, Star } from 'lucide-react';
 import {
   addCarImages, deleteCarImage, setCoverImage, VehicleApiError,
   LISTING_IMAGE_TYPES, LISTING_IMAGE_MAX_BYTES, LISTING_IMAGE_MAX_PER_REQUEST, LISTING_IMAGE_MAX_PER_LISTING,
 } from '../../../services/vehicleApi';
 import type { ListingImage } from '../../../services/vehicleApi';
-import { usePreviewUrls, photoKey } from './DealerListingPhotoPicker';
 
 /**
  * Existing-listing photo management. Uses only the existing owner-enforced routes
@@ -46,7 +45,6 @@ const btn = 'px-3 py-1.5 rounded-lg text-xs font-bold focus-visible:outline focu
 
 const DealerListingPhotos: React.FC<DealerListingPhotosProps> = ({ carId, initialImages, disabled, onChanged }) => {
   const [images, setImages] = useState<ListingImage[]>(initialImages);
-  const [picked, setPicked] = useState<File[]>([]);
   const [busy, setBusy] = useState<null | 'upload' | number>(null);
   const [confirmIndex, setConfirmIndex] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -70,7 +68,6 @@ const DealerListingPhotos: React.FC<DealerListingPhotosProps> = ({ carId, initia
       const res = await addCarImages(carId, files);
       if (res.success === false) throw new VehicleApiError(res.message || 'Photos could not be uploaded.', 'server');
       apply(res.data?.images);
-      setPicked([]);
       if (inputRef.current) inputRef.current.value = '';
       setNotice(`${files.length} photo${files.length === 1 ? '' : 's'} added.`);
     } catch (err) {
@@ -108,7 +105,7 @@ const DealerListingPhotos: React.FC<DealerListingPhotosProps> = ({ carId, initia
     } finally { busyRef.current = false; setBusy(null); }
   };
 
-  const previews = usePreviewUrls(picked);
+  const atLimit = images.length >= LISTING_IMAGE_MAX_PER_LISTING;
   const working = busy !== null;
   const onlyOne = images.length <= 1;
 
@@ -158,31 +155,22 @@ const DealerListingPhotos: React.FC<DealerListingPhotosProps> = ({ carId, initia
       )}
       {onlyOne && images.length === 1 && <p className="mt-2 text-xs text-[#475569]">A listing needs at least one photo, so the last one cannot be removed. Add another first.</p>}
 
-      <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-3">
-        <label htmlFor="listing-add-photos" className="text-sm text-[#0A3340]">Add photos</label>
+      <div className="relative mt-4 flex flex-wrap items-center gap-3">
+        <label
+          htmlFor="listing-add-photos"
+          className={`inline-flex min-h-11 items-center gap-2 rounded-lg bg-[#176B87] px-4 text-sm font-bold text-white focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#0A3340] ${working || atLimit ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-[#12576D]'}`}
+        >
+          {busy === 'upload' ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <Upload className="w-4 h-4" aria-hidden="true" />}
+          {busy === 'upload' ? 'Uploading…' : 'Add photos'}
+        </label>
         <input
-          id="listing-add-photos" ref={inputRef} type="file" multiple accept={LISTING_IMAGE_TYPES.join(',')} disabled={working}
-          onChange={(e) => { setPicked(Array.from(e.target.files || [])); setError(null); setNotice(null); setRetry(null); }}
-          className="text-sm max-w-full"
+          id="listing-add-photos" ref={inputRef} type="file" multiple accept={LISTING_IMAGE_TYPES.join(',')} disabled={working || atLimit}
+          onChange={(e) => { const files = Array.from(e.target.files || []); e.target.value = ''; setError(null); setNotice(null); setRetry(null); if (files.length) void upload(files); }}
+          className="sr-only"
           aria-describedby="listing-add-photos-hint"
         />
-        <button type="button" disabled={working || picked.length === 0} onClick={() => upload(picked)} aria-busy={busy === 'upload'}
-          className={`${btn} bg-[#176B87] text-white flex items-center justify-center gap-1`}>
-          {busy === 'upload' ? <Loader2 className="w-3 h-3 animate-spin" aria-hidden="true" /> : <Upload className="w-3 h-3" aria-hidden="true" />}
-          {busy === 'upload' ? 'Uploading…' : `Upload${picked.length ? ` ${picked.length}` : ''}`}
-        </button>
+        <span className="text-xs text-[#475569]" aria-live="polite">{atLimit ? `This listing has the maximum of ${LISTING_IMAGE_MAX_PER_LISTING} photos. Remove one to add another.` : `${LISTING_IMAGE_MAX_PER_LISTING - images.length} more can be added. Photos upload as soon as you choose them.`}</span>
       </div>
-      {picked.length > 0 && (
-        <ul className="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-3" aria-label="Photos ready to upload">
-          {picked.map((f, i) => (
-            <li key={photoKey(f)} className="relative min-w-0">
-              <img src={previews[i]} alt={`Ready to upload: ${f.name}`} className="w-full h-16 object-cover rounded-md border border-[#D7E7E4]" />
-              <button type="button" disabled={working} onClick={() => setPicked((p) => p.filter((_, k) => k !== i))} aria-label={`Do not upload ${f.name}`}
-                className="absolute -right-1 -top-1 rounded-full bg-white border border-[#B9D3CF] p-0.5 text-[#B42318]"><X className="w-3 h-3" aria-hidden="true" /></button>
-            </li>
-          ))}
-        </ul>
-      )}
       <p id="listing-add-photos-hint" className="mt-1 text-xs text-[#475569]">JPG, PNG or WEBP, up to 5 MB each, {LISTING_IMAGE_MAX_PER_REQUEST} at a time. Existing photos are kept when you save the details.</p>
 
       {error && (

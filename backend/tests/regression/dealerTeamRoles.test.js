@@ -87,8 +87,28 @@ describe("custom roles", () => {
     const u = await call(ctrl.updateTeamRole, { ...OWNER, params: { roleKey: "custom_clerk" }, body: { permissions: { canListCars: true, canChatBuyers: true } } });
     expect(u.statusCode).toBe(200); expect(u.body.updatedMembers).toBe(1);
     expect(Object.values(store.teams)[0].permissions.canChatBuyers).toBe(true);
-    expect((await call(ctrl.updateTeamRole, { ...OWNER, params: { roleKey: "viewer" }, body: { label: "Seer" } })).body.code).toBe("ROLE_BUILTIN");
     expect((await call(ctrl.deleteTeamRole, { ...OWNER, params: { roleKey: "viewer" } })).body.code).toBe("ROLE_BUILTIN");
+  });
+  test("owner can edit a built-in role: stored as an override, applied to members, reset restores the default; Basic Staff Access stays locked", async () => {
+    await call(ctrl.inviteTeamMember, { ...OWNER, body: { email: "a@x.test" } });
+    const m = Object.values(store.teams)[0];
+    m.status = "active"; m.role = "sales_agent"; m.permissions = { ...ALL, canManageTeam: false, canDeleteCars: false, canViewEarnings: false, canApproveDeals: false, canEditSettings: false };
+    const base = { ...m.permissions };
+    // a second sales agent whose access the owner adjusted individually keeps it
+    store.teams.x2 = { id: "x2", dealer: D1, role: "sales_agent", status: "active", permissions: { ...base, canDeleteCars: true } };
+    const u = await call(ctrl.updateTeamRole, { ...OWNER, params: { roleKey: "sales_agent" }, body: { label: "Showroom agent", permissions: { ...base, canViewEarnings: true } } });
+    expect(u.statusCode).toBe(200); expect(u.body.data).toMatchObject({ key: "sales_agent", label: "Showroom agent", builtin: true, customised: true });
+    expect(u.body.updatedMembers).toBe(1); expect(u.body.keptCustom).toBe(1);
+    expect(m.permissions.canViewEarnings).toBe(true);
+    expect(store.teams.x2.permissions.canViewEarnings).toBe(false);
+    const list = (await call(ctrl.getTeamRoles, OWNER)).body.data.roles.find((x) => x.key === "sales_agent");
+    expect(list).toMatchObject({ label: "Showroom agent", customised: true }); expect(list.permissions.canViewEarnings).toBe(true);
+    expect(audit.map((a) => a.action)).toContain("dealer_team_role_updated");
+    const r = await call(ctrl.resetTeamRole, { ...OWNER, params: { roleKey: "sales_agent" } });
+    expect(r.statusCode).toBe(200); expect(r.body.data.label).toBe("Sales agent"); expect(m.permissions.canViewEarnings).toBe(false);
+    expect((await call(ctrl.resetTeamRole, { ...OWNER, params: { roleKey: "sales_agent" } })).body.code).toBe("ROLE_NOT_CUSTOMISED");
+    expect((await call(ctrl.updateTeamRole, { ...OWNER, params: { roleKey: "basic_staff" }, body: { permissions: { canListCars: true } } })).body.code).toBe("ROLE_LOCKED");
+    expect((await call(ctrl.updateTeamRole, { ...MGR, params: { roleKey: "viewer" }, body: { permissions: { canListCars: true } } })).statusCode).toBe(403);
   });
   test("a role in use cannot be deleted; an unused one can", async () => {
     await call(ctrl.createTeamRole, { ...OWNER, body: { label: "Clerk", permissions: {} } });

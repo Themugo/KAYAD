@@ -51,6 +51,7 @@ import {
   getTeamRoles,
   createTeamRole,
   updateTeamRole,
+  resetTeamRole,
   deleteTeamRole,
   updateTeamMember,
   removeTeamMember,
@@ -152,6 +153,7 @@ router.post("/team/:memberId/resend", protect, dealerOrgAccess("canManageTeam"),
 router.get("/team/roles", protect, dealerOrgAccess("canManageTeam"), asyncHandler(getTeamRoles));
 router.post("/team/roles", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(createTeamRole));
 router.put("/team/roles/:roleKey", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(updateTeamRole));
+router.post("/team/roles/:roleKey/reset", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(resetTeamRole));
 router.delete("/team/roles/:roleKey", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(deleteTeamRole));
 router.get("/team/:memberId/temporary-duties", protect, dealerOrgAccess("canManageTeam"), asyncHandler(getTemporaryDuties));
 router.post("/team/:memberId/temporary-duties", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(createTemporaryDuty));

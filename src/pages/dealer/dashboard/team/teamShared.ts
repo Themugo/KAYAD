@@ -1,4 +1,4 @@
-export interface TeamRole { key: string; label: string; description?: string; permissions: Record<string, boolean>; builtin?: boolean; onboarding?: boolean }
+export interface TeamRole { key: string; label: string; description?: string; permissions: Record<string, boolean>; builtin?: boolean; onboarding?: boolean; locked?: boolean; customised?: boolean }
 export interface PermissionDef { key: string; label: string }
 
 export const inputCls = 'px-3 py-2 border border-[#B9D3CF] rounded-lg text-sm text-[#0A3340] bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#0A3340]';
