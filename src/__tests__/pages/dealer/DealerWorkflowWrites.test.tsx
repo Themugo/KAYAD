@@ -270,9 +270,8 @@ describe('Dealer photo management and listing removal (Phase 14.6, mocked)', () 
 
   it('uploads photos, shows pending, applies the server list, and never fakes success on failure (retry works)', async () => {
     await open('section=inventory&mode=edit&id=c1');
-    fireEvent.change(screen.getByLabelText('Add photos'), { target: { files: [new File(['x'], 'a.png', { type: 'image/png' })] } });
     veh.addCarImages.mockRejectedValueOnce(new veh.VehicleApiError('Cloud storage not configured.', 'server', 500));
-    fireEvent.click(screen.getByRole('button', { name: /Upload 1/ }));
+    fireEvent.change(screen.getByLabelText('Add photos'), { target: { files: [new File(['x'], 'a.png', { type: 'image/png' })] } });
     expect((await screen.findByRole('alert')).textContent).toContain('Cloud storage not configured.');
     expect(screen.getByRole('list', { name: 'Current photos' }).querySelectorAll('li')).toHaveLength(2);
     veh.addCarImages.mockResolvedValueOnce({ success: true, data: { images: [...imgs, { url: 'https://img/3.jpg', public_id: 'p3' }] } });
@@ -282,15 +281,33 @@ describe('Dealer photo management and listing removal (Phase 14.6, mocked)', () 
     expect(veh.addCarImages.mock.calls[1][0]).toBe('c1');
   });
 
+  it('Add photos is an always-available button that uploads as soon as files are chosen', async () => {
+    veh.addCarImages.mockResolvedValueOnce({ success: true, data: { images: [...imgs, { url: 'https://img/3.jpg', public_id: 'p3' }] } });
+    await open('section=inventory&mode=edit&id=c1');
+    expect(screen.getByLabelText('Add photos')).toBeEnabled();
+    fireEvent.change(screen.getByLabelText('Add photos'), { target: { files: [new File(['x'], 'a.png', { type: 'image/png' })] } });
+    await waitFor(() => expect(screen.getByRole('list', { name: 'Current photos' }).querySelectorAll('li')).toHaveLength(3));
+    expect(veh.addCarImages).toHaveBeenCalledTimes(1);
+    expect(await screen.findByText('1 photo added.')).toBeInTheDocument();
+  });
+
+  it('edit saves body type and features with the other details', async () => {
+    veh.updateCar.mockResolvedValue({ success: true, data: { id: 'c1' } });
+    await open('section=inventory&mode=edit&id=c1');
+    fireEvent.change(screen.getByLabelText('Body type'), { target: { value: 'SUV' } });
+    fireEvent.change(screen.getByLabelText('Features'), { target: { value: 'Sunroof\n\n Leather seats ' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    await waitFor(() => expect(veh.updateCar).toHaveBeenCalled());
+    expect(veh.updateCar.mock.calls[0][1]).toMatchObject({ bodyType: 'SUV', features: ['Sunroof', 'Leather seats'] });
+  });
+
   it('rejects wrong type / oversize / over-limit files client-side without calling the API', async () => {
     await open('section=inventory&mode=edit&id=c1');
     fireEvent.change(screen.getByLabelText('Add photos'), { target: { files: [new File(['x'], 'a.gif', { type: 'image/gif' })] } });
-    fireEvent.click(screen.getByRole('button', { name: /Upload 1/ }));
     expect((await screen.findByRole('alert')).textContent).toMatch(/only JPG, PNG or WEBP/);
     const big = new File(['x'], 'big.jpg', { type: 'image/jpeg' });
     Object.defineProperty(big, 'size', { value: 6 * 1024 * 1024 });
     fireEvent.change(screen.getByLabelText('Add photos'), { target: { files: [big] } });
-    fireEvent.click(screen.getByRole('button', { name: /Upload 1/ }));
     expect((await screen.findByRole('alert')).textContent).toMatch(/5 MB/);
     expect(veh.addCarImages).not.toHaveBeenCalled();
   });

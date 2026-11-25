@@ -25,6 +25,17 @@ describe('StaffDetail', () => {
     expect(screen.getByTestId('detail-business-email')).toHaveTextContent('None recorded');
     await waitFor(() => expect(screen.getByTestId('detail-login-email')).toHaveTextContent('jane@x.test'));
   });
+  it('lets the owner adjust one person’s permissions individually', async () => {
+    api.updateTeamMember.mockResolvedValue({ success: true });
+    api.getTeamMemberDetail.mockResolvedValue({ data: { identity: { loginEmail: 'jane@x.test' }, effectivePermissions: [{ key: 'canListCars', label: 'Add new vehicle listings', granted: true }, { key: 'canViewEarnings', label: 'See earnings and payouts', granted: false }], events: [] } });
+    render(<StaffDetail member={{ ...member, role: 'sales_agent', roleLabel: 'Sales agent' }} roles={roles} employmentAvailable onClose={onClose} onChanged={onChanged} />);
+    await userEvent.click(await screen.findByRole('button', { name: 'Adjust this person’s access' }));
+    await userEvent.click(screen.getByLabelText('See earnings and payouts'));
+    api.getTeamMemberDetail.mockResolvedValue({ data: { identity: { loginEmail: 'jane@x.test' }, effectivePermissions: [{ key: 'canListCars', label: 'Add new vehicle listings', granted: true }, { key: 'canViewEarnings', label: 'See earnings and payouts', granted: true }], events: [] } });
+    await userEvent.click(screen.getByRole('button', { name: 'Save access' }));
+    await waitFor(() => expect(api.updateTeamMember).toHaveBeenCalledWith('m1', { permissions: { canListCars: true, canViewEarnings: true } }));
+    expect(await screen.findByTestId('custom-access-note')).toHaveTextContent('Custom access');
+  });
   it('applies a role through the existing role endpoint', async () => {
     api.updateTeamMember.mockResolvedValue({ success: true });
     render(<StaffDetail member={member} roles={roles} employmentAvailable onClose={onClose} onChanged={onChanged} />);

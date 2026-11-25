@@ -86,14 +86,12 @@ describe('existing-listing photos: choose the poster', () => {
     expect(await screen.findByRole('alert')).toBeInTheDocument();
     expect(within(screen.getByRole('list', { name: 'Current photos' })).getAllByRole('img')[0]).toHaveAttribute('src', 'u1');
   });
-  it('files picked for upload are previewed and can be dropped before uploading', async () => {
-    const user = userEvent.setup();
+  it('files chosen with Add photos upload immediately and the button stays available', async () => {
+    m.addCarImages.mockResolvedValue({ success: true, data: { images: [...imgs, { url: 'n1', public_id: 'n1' }] } });
     render(<DealerListingPhotos carId="c1" initialImages={imgs} />);
-    fireEvent.change(document.getElementById('listing-add-photos')!, { target: { files: [img('new1.jpg'), img('new2.jpg')] } });
-    const ready = await screen.findByRole('list', { name: 'Photos ready to upload' });
-    expect(within(ready).getAllByRole('img')).toHaveLength(2);
-    await user.click(screen.getByRole('button', { name: 'Do not upload new1.jpg' }));
-    expect(within(screen.getByRole('list', { name: 'Photos ready to upload' })).getAllByRole('img')).toHaveLength(1);
-    expect(screen.getByRole('button', { name: /^Upload 1$/ })).toBeEnabled();
+    expect(screen.getByLabelText('Add photos')).toBeEnabled();
+    fireEvent.change(document.getElementById('listing-add-photos')!, { target: { files: [img('new1.jpg')] } });
+    await waitFor(() => expect(m.addCarImages).toHaveBeenCalledWith('c1', [expect.any(File)]));
+    expect(screen.getByLabelText('Add photos')).toBeEnabled();
   });
 });

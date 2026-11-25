@@ -1,0 +1,50 @@
+// Real-browser check: edit-vehicle photo upload is usable, built-in roles are editable, per-person access can be adjusted. Disposable stack only.
+import { createRequire } from 'node:module'; import fs from 'node:fs';
+process.env.KAYAD_JOURNEY_BASE ||= 'http://127.0.0.1:5065'; process.env.KAYAD_JOURNEY_DB ||= 'kayad_ci_adm'; process.env.PGPORT ||= '5432'; process.env.PGPASSWORD ||= 'ci-disposable-only';
+const { PW } = await import('../db-journeys/lib.mjs');
+const require = createRequire(new URL('../../package.json', import.meta.url).pathname); const { chromium } = require('playwright');
+const BASE = 'http://127.0.0.1:5299', OUT = 'docs/dealer-dashboard-upgrade/evidence';
+const seed = JSON.parse(fs.readFileSync(new URL('../db-journeys/out/browser-seed.json', import.meta.url)));
+const res = []; const ok = (n, c, x) => { res.push({ name: n, pass: !!c }); console.log(`${c ? 'PASS' : 'FAIL'} ${n}${c ? '' : ' ' + JSON.stringify(x)}`); };
+const b = await chromium.launch({ args: ['--disable-dev-shm-usage', '--disable-gpu'] });
+const c = await b.newContext({ viewport: { width: 1440, height: 900 } }); const p = await c.newPage();
+const errs = []; p.on('pageerror', (e) => errs.push(e.message));
+await p.goto(`${BASE}/login`, { waitUntil: 'domcontentloaded' }); await p.waitForTimeout(1500);
+await p.locator('input[type="email"], input[name="email"]').first().fill(seed.dealer); await p.locator('input[type="password"]').first().fill(PW); await p.locator('button[type="submit"]').first().click();
+await p.waitForFunction(() => !location.pathname.startsWith('/login'), null, { timeout: 25000 }).catch(() => {}); await p.waitForTimeout(2500);
+for (let i = 0; i < 6; i++) { await p.goto(`${BASE}/?nav=dealer-dashboard&section=inventory`, { waitUntil: 'domcontentloaded' }); if (await p.waitForSelector('[data-testid=dealer-sidebar]', { timeout: 8000 }).catch(() => null)) break; }
+await p.waitForTimeout(2500);
+// create a vehicle through the real form so there is something to edit
+await p.getByRole('button', { name: /Add vehicle/ }).first().click(); await p.waitForTimeout(800);
+await p.getByLabel(/^Title/).fill('Test Cruiser'); await p.getByLabel(/^Brand/).fill('Toyota'); await p.getByLabel(/^Model/).fill('Cruiser'); await p.getByLabel(/^Year/).fill('2019'); await p.getByLabel(/^Price/).fill('3500000');
+const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGD4DwABBAEAX+XDSwAAAABJRU5ErkJggg==', 'base64'); fs.writeFileSync('/tmp/claude-0/t1.png', png); fs.writeFileSync('/tmp/claude-0/t2.png', png);
+await p.locator('input[type=file]').first().setInputFiles('/tmp/claude-0/t1.png'); await p.waitForTimeout(500);
+await p.getByRole('button', { name: /Publish vehicle/ }).click(); await p.waitForTimeout(4000);
+const edit = p.getByRole('button', { name: /^Edit/ }).first(); ok('listing exists to edit', await edit.count() > 0, await p.locator('body').innerText().then((t) => t.slice(0, 300)));
+await edit.click(); await p.waitForTimeout(1500);
+const add = p.getByLabel('Add photos'); ok('edit: Add photos control is enabled', await add.isEnabled());
+const lbl = p.locator('label[for=listing-add-photos]'); const box = await lbl.boundingBox(); ok('edit: Add photos is a visible button (>=44px tall)', box && box.height >= 44, box);
+let called = false; p.on('request', (r) => { if (/\/api\/cars\/.+\/images/.test(r.url()) && r.method() === 'POST') called = true; });
+await add.setInputFiles('/tmp/claude-0/t2.png'); await p.waitForTimeout(3500);
+ok('edit: choosing a photo uploads it immediately (no second step)', called);
+console.log('photo status text:', (await p.locator('fieldset').filter({ hasText: 'Photos (' }).innerText()).replace(/\n+/g, ' | ').slice(0, 260));
+await p.getByLabel('Body type').selectOption('SUV'); await p.getByLabel('Features').fill('Sunroof\nLeather seats');
+await p.locator('fieldset').filter({ hasText: 'Photos (' }).scrollIntoViewIfNeeded(); await p.screenshot({ path: `${OUT}/edit-vehicle-photos.png` });
+await p.getByRole('button', { name: 'Save changes' }).click(); await p.waitForTimeout(3000);
+ok('edit: save with body type and features succeeds', /Changes saved/.test(await p.locator('body').innerText()), (await p.locator('body').innerText()).slice(0, 200));
+// team
+await p.goto(`${BASE}/?nav=dealer-dashboard&section=team`, { waitUntil: 'domcontentloaded' }); await p.waitForTimeout(3000);
+await p.getByRole('tab', { name: 'Roles & Permissions' }).click(); await p.waitForTimeout(1200);
+ok('roles: every role except Basic Staff Access has Edit', (await p.getByRole('button', { name: /^Edit role/ }).count()) === 5 && (await p.getByRole('button', { name: 'Edit role Basic Staff Access' }).count()) === 0);
+await p.getByRole('button', { name: 'Edit role Viewer' }).click();
+await p.getByLabel('Chat with buyers and handle leads').check(); await p.getByRole('button', { name: 'Save role' }).click(); await p.waitForTimeout(1800);
+ok('roles: built-in Viewer saved and shows as customised', /Built-in · customised/.test(await p.locator('body').innerText()), (await p.locator('body').innerText()).slice(0, 200));
+await p.screenshot({ path: `${OUT}/roles-editable.png`, fullPage: false });
+await p.getByRole('button', { name: 'Reset role Viewer to default' }).click(); await p.getByRole('button', { name: 'Confirm reset' }).click(); await p.waitForTimeout(1500);
+ok('roles: reset to default restores Viewer', !/Built-in · customised/.test(await p.locator('body').innerText()));
+await p.getByRole('tab', { name: /^Team Members/ }).click(); await p.waitForTimeout(800);
+const rows = p.locator('[data-testid^=member-row-]'); const n = await rows.count();
+if (n) { await rows.first().getByRole('button', { name: /^View/ }).click(); await p.waitForTimeout(1200); const adj = p.getByRole('button', { name: /Adjust this person/ }); if (await adj.count()) { await adj.click(); ok('staff: per-person permission editor opens with all 8 permissions', (await p.locator('fieldset[aria-label^="Adjust access"] input[type=checkbox]').count()) === 8); await p.screenshot({ path: `${OUT}/staff-adjust-access.png` }); } else console.log('NOT RUN staff editor: no adjust button (member state)'); } else console.log('NOT RUN staff editor: no members in seed');
+ok('no page errors', errs.length === 0, errs);
+fs.writeFileSync(`${OUT}/inventory-team-results.json`, JSON.stringify(res, null, 1));
+console.log(`${res.filter((r) => r.pass).length}/${res.length} PASS`); await b.close();
