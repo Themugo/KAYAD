@@ -63,6 +63,7 @@ const AuctionsView = React.lazy(() => import('./features/AuctionsView'));
 const EscrowView = React.lazy(() => import('./features/EscrowView'));
 const EscrowOperationsDesk = React.lazy(() => import('./features/escrow/EscrowOperationsDesk'));
 const InspectionsView = React.lazy(() => import('./features/InspectionsView'));
+const DealerProfilePage = React.lazy(() => import('./components/dealer/DealerProfilePage').then((m) => ({ default: m.DealerProfilePage })));
 const DealersView = React.lazy(() => import('./features/DealersView'));
 const ChatView = React.lazy(() => import('./features/ChatView'));
 const AdminView = React.lazy(() => import('./features/AdminView'));
@@ -883,7 +884,7 @@ function AppInner() {
         onSelectVehicle={handleOpenVehicleDetails}
         viewer={authUser ? { id: authUser.id ? String(authUser.id) : undefined, role: authUser.role, isStaff: Boolean(isAdmin) || isEscrowStaffRole(authUser.role) } : null}
         onViewAuctionLot={(v) => { handleCloseVehicleDetails(); navigate(`/auction/${encodeURIComponent(v.id)}`); }}
-        onViewShowroom={(dealerName, v) => { handleCloseVehicleDetails(); if (v?.sellerId) { setDealerScope({ id: v.sellerId, name: dealerName }); setActiveNav('marketplace'); } else { handleSelectDealerVehicles(dealerName); } }}
+        onViewShowroom={(dealerName, v) => { handleCloseVehicleDetails(); if (v?.sellerId && v.sellerType !== 'Private Seller') { navigate(`/showroom/${encodeURIComponent(v.sellerId)}`); } else if (v?.sellerId) { setDealerScope({ id: v.sellerId, name: dealerName }); setActiveNav('marketplace'); } else { handleSelectDealerVehicles(dealerName); } }}
         onManageListing={() => { handleCloseVehicleDetails(); navigate('/admin/cars'); }}
         onEditListing={(v) => {
           handleCloseVehicleDetails();
@@ -961,6 +962,7 @@ function AuthRouteSurface() {
   // Keying on `path` forces a clean remount per auction, matching how a
   // real <Route path="/auction/:id"> would behave.
   if (path.startsWith('/auction/')) return <AuctionLivePage key={path} />;
+  if (path.startsWith('/showroom/')) return <DealerProfilePage key={path} />;
   if (path === '/force-password-change') return <ForcePasswordChange />;
   // All notification entry points use this canonical authenticated destination.
   // Previously /notifications had no route, while the panel's 'View All' sent

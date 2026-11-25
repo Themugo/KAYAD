@@ -21,6 +21,11 @@ const DELIVERY_TRANSITIONS = {
   bounced: new Set(["bounced"]),
 };
 
+// Stored notification type for a communication event ("bid.confirmed" -> "bid"). Unknown events are plain "info".
+const IN_APP_TYPES = { bid: "bid", auction: "auction", payment: "payment", escrow: "escrow", dispute: "dispute", inspection: "inspection", chat: "chat", dealer: "verification", support: "system", security: "system", admin: "system" };
+const inAppTypeFor = (eventType) => IN_APP_TYPES[String(eventType || "").split(/[._:]/)[0]] || "info";
+const safeInAppLink = (value) => (typeof value === "string" && value.startsWith("/") && !value.startsWith("//") && !value.includes("\\") && !/[\u0000-\u001f\u007f]/.test(value) ? value : undefined);
+
 const normalizePhone = (phone) => {
   if (!phone) return null;
   const raw = String(phone).trim();
@@ -217,15 +222,24 @@ export const deliver = async ({
 
   try {
     if (channel === "in_app") {
-      const io = getIO();
-      if (io && userId) {
-        io.to(`user_${userId}`).emit("notification", {
-          userId,
+      // The in-app channel used to emit a socket event only. Nothing was stored, so the bell and the Notifications page (which
+      // read stored rows) never showed these messages and a user who was offline never saw them at all. Store the row first,
+      // then wake any open session. The delivery idempotency key above guarantees one row per event.
+      if (userId) {
+        const row = await create("notifications", {
+          user: userId,
           title: subject || metadata.title || "KAYARD KE notification",
           message: message || text || "",
-          type: eventType,
-          data: metadata,
+          type: inAppTypeFor(eventType),
+          read: false,
+          ...(safeInAppLink(metadata?.link) ? { link: safeInAppLink(metadata.link) } : {}),
         });
+        const io = getIO();
+        if (io) {
+          const payload = { _id: row?.id, id: row?.id, userId, title: row?.title, message: row?.message, type: row?.type, read: false, createdAt: row?.createdAt || row?.created_at, ...(row?.link ? { link: row.link } : {}) };
+          io.to(`user_${userId}`).emit("notification", payload);
+          io.to(String(userId)).emit("notification", payload);
+        }
       }
       return delivery;
     }

@@ -121,6 +121,21 @@ export async function getCommandCentre(req, res) {
 // DEALER PROFILE (PUBLIC SHOWROOM)
 // ============================================================
 
+// Public storefront profile. Only fields in PUBLIC_DEALER_FIELDS are ever returned (allowlist built here, not trimmed in the browser).
+// A dealership is publicly visible only when it is approved and not suspended; its owner (and platform staff) can still preview it.
+// Public image links are accepted only from the configured image host(s): Cloudinary by default, extendable with PUBLIC_IMAGE_HOSTS
+// (comma-separated hostnames, https only). Outside production, a loopback http URL is also accepted so the disposable test stack can
+// exercise the real upload path. Anything else (other hosts, javascript:, data:, http) is refused on write and never returned on read.
+const publicImageHosts = () => ["res.cloudinary.com", ...String(process.env.PUBLIC_IMAGE_HOSTS || "").split(",").map((h) => h.trim().toLowerCase()).filter(Boolean)];
+export const isSafePublicImageUrl = (value) => {
+  if (typeof value !== "string" || value.length > 500 || /[\s"'<>\\]/.test(value)) return false;
+  let u;
+  try { u = new URL(value); } catch { return false; }
+  if (u.username || u.password) return false;
+  if (u.protocol === "https:") return publicImageHosts().includes(u.hostname.toLowerCase());
+  return u.protocol === "http:" && process.env.NODE_ENV !== "production" && ["127.0.0.1", "localhost"].includes(u.hostname);
+};
+
 export async function getDealerProfile(req, res) {
   try {
     const { dealerId } = req.params;
@@ -131,6 +146,14 @@ export async function getDealerProfile(req, res) {
     if (!dealerUser || dealerUser.role !== 'dealer') {
       return res.status(404).json({ success: false, message: 'Dealer not found' });
     }
+    const isOwner = Boolean(req.user && String(req.user.id) === String(dealerId));
+    const isPlatformStaff = Boolean(req.user && ["admin", "superadmin"].includes(String(req.user.role || "").toLowerCase()));
+    const suspended = Boolean(dealerRecord?.isSuspended ?? dealerRecord?.is_suspended);
+    const publiclyVisible = Boolean(dealerRecord?.approved) && !suspended;
+    if (!publiclyVisible && !isOwner && !isPlatformStaff) {
+      // Same answer as an unknown id: a pending, rejected or suspended dealership is not discoverable by outsiders.
+      return res.status(404).json({ success: false, message: 'Dealer not found' });
+    }
 
     const [listings, reviewSummary] = await Promise.all([
       Car.find({ dealer: dealerId, deletedAt: { $exists: false } }),
@@ -138,23 +161,27 @@ export async function getDealerProfile(req, res) {
     ]);
 
     const averageRating = reviewSummary.total ? reviewSummary.averageRating : null;
+    const logo = dealerRecord?.logoUrl ?? dealerRecord?.logo_url ?? null;
+    const banner = dealerRecord?.bannerUrl ?? dealerRecord?.banner_url ?? null;
 
+    res.set("Cache-Control", isOwner || isPlatformStaff ? "private, no-store" : "public, max-age=60");
     res.json({
       success: true,
       data: {
         id: dealerUser.id,
         businessName: dealerRecord?.businessName || dealerUser.businessName || null,
-        name: dealerUser.name,
         bio: dealerUser.bio || null,
         location: dealerRecord?.location || dealerUser.location || null,
-        // Phase 14.5: the account phone is returned ONLY to the signed-in owner of this profile
-        // (route uses optionalAuth). Anonymous callers, buyers and other dealers never receive it.
-        ...(req.user && String(req.user.id) === String(dealerId) ? { phone: dealerUser.phone || null } : {}),
+        logoUrl: isSafePublicImageUrl(logo) ? logo : null,
+        bannerUrl: isSafePublicImageUrl(banner) ? banner : null,
+        // Phase 14.5: the account phone is returned ONLY to the signed-in owner of this profile. The storefront contacts the dealer through enquiries/chat.
+        ...(isOwner ? { phone: dealerUser.phone || null } : {}),
         approved: Boolean(dealerRecord?.approved),
+        verified: publiclyVisible,
+        publiclyVisible,
         memberSince: dealerRecord?.createdAt || dealerUser.createdAt || null,
         stats: {
           activeListings: listings.filter((car) => ['available', 'active'].includes(car.status)).length,
-          totalListings: listings.length,
           averageRating: averageRating === null ? null : Number(averageRating.toFixed(2)),
           totalReviews: reviewSummary.total,
         },
@@ -207,6 +234,12 @@ export async function updateDealerProfile(req, res) {
       if (value.length > PROFILE_TEXT_LIMITS[field]) { fieldErrors[field] = `Must be ${PROFILE_TEXT_LIMITS[field]} characters or fewer`; continue; }
       updates[field] = value; // "" clears location / bio
     }
+    for (const f of ["logoUrl", "bannerUrl"]) {
+      if (body[f] === undefined) continue;
+      if (body[f] === "" || body[f] === null) { updates[f] = ""; continue; }
+      if (!isSafePublicImageUrl(body[f])) { fieldErrors[f] = "Upload the image through the uploader (https image link required)"; continue; }
+      updates[f] = body[f];
+    }
     let normalizedPhone;
     if (body.phone !== undefined) {
       if (typeof body.phone !== "string" || !body.phone.trim()) fieldErrors.phone = "Enter a valid Kenyan phone number";
@@ -234,6 +267,8 @@ export async function updateDealerProfile(req, res) {
     }
 
     const userUpdates = { ...updates };
+    // Logo and banner live on the dealership record, not the user account.
+    delete userUpdates.logoUrl; delete userUpdates.bannerUrl;
     if (normalizedPhone !== undefined && normalizedPhone !== existingUser.phone) {
       // Phase 14.9: the account phone is the payout destination - a changed number needs password step-up (before any write).
       const refusal = await checkPasswordStepUp(req.user.id, body.currentPassword);
@@ -247,6 +282,8 @@ export async function updateDealerProfile(req, res) {
     const dealerUpdates = {};
     if (updates.businessName !== undefined) dealerUpdates.businessName = updates.businessName;
     if (updates.location !== undefined) dealerUpdates.location = updates.location;
+    if (updates.logoUrl !== undefined) dealerUpdates.logoUrl = updates.logoUrl || null;
+    if (updates.bannerUrl !== undefined) dealerUpdates.bannerUrl = updates.bannerUrl || null;
     let dealerWritten = false;
     if (dealerRecord && Object.keys(dealerUpdates).length) {
       await Dealer.findByIdAndUpdate(dealerRecord.id, dealerUpdates, { new: true, runValidators: true });
@@ -272,7 +309,7 @@ export async function updateDealerProfile(req, res) {
 
     await logAuditEvent({
       action: "dealer_profile_updated", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email,
-      target: dealerId, targetModel: "User", details: { fields: Object.keys(userUpdates).filter((f) => f !== "phoneVerified") },
+      target: dealerId, targetModel: "User", details: { fields: [...Object.keys(userUpdates).filter((f) => f !== "phoneVerified"), ...Object.keys(updates).filter((f) => f === "logoUrl" || f === "bannerUrl")] },
       ipAddress: req.ip, userAgent: req.get?.("user-agent"), requestId: req.id,
     }).catch(() => {});
 
@@ -284,6 +321,8 @@ export async function updateDealerProfile(req, res) {
         location: user.location || dealerRecord?.location || null,
         phone: user.phone || null,
         bio: user.bio || null,
+        logoUrl: updates.logoUrl !== undefined ? (updates.logoUrl || null) : (dealerRecord?.logoUrl ?? dealerRecord?.logo_url ?? null),
+        bannerUrl: updates.bannerUrl !== undefined ? (updates.bannerUrl || null) : (dealerRecord?.bannerUrl ?? dealerRecord?.banner_url ?? null),
         approved: Boolean(dealerRecord?.approved),
         updatedAt: user.updatedAt || new Date().toISOString(),
       },
@@ -794,6 +833,16 @@ async function notifyDealer(dealerId, { title, message, type = "info", data = {}
   try { const { createNotification } = await import("./notificationController.js"); await createNotification({ user: dealerId, title, message, type, data, link: "/?nav=dealer-dashboard&section=team" }); } catch { /* best-effort */ }
 }
 
+// In-app notice to ONE employee about a change to their own access (never e-mail/SMS). Best-effort.
+async function notifyStaffMember(dealerId, memberUserId, { title, message }) {
+  if (!memberUserId) return;
+  try {
+    const { sendNotification } = await import("../services/notification.service.js");
+    await sendNotification({ userId: memberUserId, title, message, type: "team", link: "/?nav=dealer-dashboard", data: { dealerId: String(dealerId) }, channels: [] });
+  } catch { /* best-effort */ }
+}
+const dealershipLabel = async (dealerId) => { try { return dealerPublicName(await User.findById(dealerId)) || "your dealership"; } catch { return "your dealership"; } };
+
 export async function inviteTeamMember(req, res) {
   const email = normalizeEmail(req.body?.email);
   // Product rule: every new invitation starts with Basic Staff Access (no operational permissions). The dealer assigns the job role AFTER the person joins.
@@ -991,6 +1040,22 @@ export async function updateTeamMember(req, res) {
     if (updates.status && updates.status !== existing.status) await recordEmploymentEvent({ ...common, type: eventForStatus(existing, updates.status), from: { status: existing.status }, to: { status: updates.status } });
   }
   await logAuditEvent({ action: "dealer_team_member_updated", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: row.id, targetModel: "DealerTeam", oldValue: publicTeamRow(existing), newValue: publicTeamRow(row), ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
+  if (existing.member) {
+    const dn = await dealershipLabel(dealerId);
+    if (updates.role && updates.role !== existing.role) {
+      const r = await resolveRole(dealerId, updates.role);
+      await notifyStaffMember(dealerId, existing.member, { title: "Your role changed", message: `Your role at ${dn} is now ${r?.label || String(updates.role).replace(/_/g, " ")}. Your access has been updated.` });
+    } else if (updates.permissions) {
+      await notifyStaffMember(dealerId, existing.member, { title: "Your access changed", message: `${dn} updated what you can do in the dealer workspace.` });
+    }
+    if (updates.status && updates.status !== existing.status) {
+      await notifyStaffMember(dealerId, existing.member, updates.status === "suspended"
+        ? { title: "Your access was suspended", message: `Your access to ${dn} has been suspended.` }
+        : updates.status === "active"
+          ? { title: "Your access was restored", message: `Your access to ${dn} has been restored.` }
+          : { title: "Your access ended", message: `Your access to ${dn} has ended.` });
+    }
+  }
   return res.json({ success: true, data: publicTeamRow(row) });
 }
 
@@ -1238,6 +1303,14 @@ export async function applyEmploymentAction(req, res) {
   const row = await update("dealer_teams", target.id, patch);
   await recordEmploymentEvent({ dealerId, teamId: target.id, type: rule.event, actor: req.user.id, actorLabel: req.actingMember?.name || req.user.name, staffNumber: target.staffNumber ?? null, from: { status: target.status, employmentStatus: target.employmentStatus }, to: { status: rule.status, employmentStatus: rule.employmentStatus }, reason });
   await logAuditEvent({ action: `dealer_team_employment_${action}`, actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: row.id, targetModel: "DealerTeam", oldValue: publicTeamRow(target), newValue: publicTeamRow(row), ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
+  if (target.member) {
+    const dn = await dealershipLabel(dealerId);
+    await notifyStaffMember(dealerId, target.member, action === "suspend"
+      ? { title: "Your access was suspended", message: `Your access to ${dn} has been suspended.` }
+      : action === "reinstate"
+        ? { title: "Your access was restored", message: `Your access to ${dn} has been restored.` }
+        : { title: "Your employment record was updated", message: `Your employment with ${dn} has ended and your access has been removed. Your personal KAYARD KE account is not affected.` });
+  }
   return res.json({ success: true, data: publicTeamRow(row) });
 }
 

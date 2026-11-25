@@ -48,6 +48,13 @@ const auditCreate = jest.fn(async (d) => ({ ...d }));
 jest.unstable_mockModule("../../models/AuditLog.js", () => ({ default: { create: auditCreate } }));
 jest.unstable_mockModule("../../middleware/auditLog.js", () => ({ auditLog: () => (req, res, next) => next() }));
 jest.unstable_mockModule("../../services/notification.service.js", () => ({ sendNotification: jest.fn(async (n) => { world.notifications.push(n); }) }));
+jest.unstable_mockModule("../../services/communicationEvents.service.js", () => ({
+  COMMUNICATION_EVENTS: new Proxy({}, { get: (_t, k) => (k === "DEALER_VERIFIED" ? "dealer.verified" : String(k)) }),
+  emitCommunication: jest.fn(async (n) => { world.notifications.push({ ...n }); }),
+  emitToUsers: jest.fn(async () => []),
+  emitToUserFromRecord: jest.fn(async () => null),
+  emitAuctionOutcome: jest.fn(async () => null),
+}));
 const dbFindOne = jest.fn(async (table, filters) => {
   const key = String(filters?.user ?? "");
   if (table === "dealers") return clone(world.dealers[key] ?? null);
@@ -195,7 +202,7 @@ describe("an authorized administrator approves a valid pending dealer (scenarios
     registerDealer(UID(11));
     await approve(UID(11));
     await new Promise((r) => setImmediate(r));
-    expect(world.notifications.filter((n) => n.title === "Seller Account Approved")).toHaveLength(1);
+    expect(world.notifications.filter((n) => n.eventType === "dealer.verified")).toHaveLength(1);
   });
 });
 
@@ -360,7 +367,7 @@ describe("retry creates no duplicate records or side effects (scenario 12)", () 
     expect(world.rpcCalls).toHaveLength(1);
     expect(world.dbAudit).toHaveLength(1);
     expect(auditActions().filter((a) => a === "Dealer decision: approve-dealer")).toHaveLength(1);
-    expect(world.notifications.filter((n) => n.title === "Seller Account Approved")).toHaveLength(1);
+    expect(world.notifications.filter((n) => n.eventType === "dealer.verified")).toHaveLength(1);
   });
   test("two simultaneous clicks produce exactly one decision and one set of side effects", async () => {
     registerDealer(UID(51));
@@ -371,7 +378,7 @@ describe("retry creates no duplicate records or side effects (scenario 12)", () 
     expect(world.rpcCalls).toHaveLength(1);
     expect(world.dbAudit).toHaveLength(1);
     expect(auditActions().filter((x) => x === "Dealer decision: approve-dealer")).toHaveLength(1);
-    expect(world.notifications.filter((n) => n.title === "Seller Account Approved")).toHaveLength(1);
+    expect(world.notifications.filter((n) => n.eventType === "dealer.verified")).toHaveLength(1);
   });
   test("retrying after a refusal that was then fixed succeeds once", async () => {
     registerDealer(UID(52), { onboarded: false });

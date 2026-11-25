@@ -1,0 +1,78 @@
+[
+ {
+  "name": "SETTINGS: Public storefront section is present",
+  "pass": true
+ },
+ {
+  "name": "SETTINGS: logo and banner uploaded and saved to the dealership record",
+  "pass": true
+ },
+ {
+  "name": "SETTINGS: logo preview persists after reload",
+  "pass": true
+ },
+ {
+  "name": "STOREFRONT 320px: renders name, verified badge, logo and vehicles with no horizontal scroll",
+  "pass": true
+ },
+ {
+  "name": "STOREFRONT 360px: renders name, verified badge, logo and vehicles with no horizontal scroll",
+  "pass": true
+ },
+ {
+  "name": "STOREFRONT 390px: renders name, verified badge, logo and vehicles with no horizontal scroll",
+  "pass": true
+ },
+ {
+  "name": "STOREFRONT 430px: renders name, verified badge, logo and vehicles with no horizontal scroll",
+  "pass": true
+ },
+ {
+  "name": "STOREFRONT 768px: renders name, verified badge, logo and vehicles with no horizontal scroll",
+  "pass": true
+ },
+ {
+  "name": "STOREFRONT 1024px: renders name, verified badge, logo and vehicles with no horizontal scroll",
+  "pass": true
+ },
+ {
+  "name": "STOREFRONT 1440px: renders name, verified badge, logo and vehicles with no horizontal scroll",
+  "pass": true
+ },
+ {
+  "name": "BUYER: a vehicle link from the storefront opens the vehicle (no dead end)",
+  "pass": true
+ },
+ {
+  "name": "BUYER: the vehicle page offers a way to contact the seller",
+  "pass": true
+ },
+ {
+  "name": "STOREFRONT: unknown dealership shows a friendly not-available page",
+  "pass": true
+ },
+ {
+  "name": "BELL: dealer top-bar bell shows the same unread count as the database",
+  "pass": true
+ },
+ {
+  "name": "BELL: notifications page lists the New enquiry with real wording",
+  "pass": true
+ },
+ {
+  "name": "BELL: Mark all read clears unread in the database",
+  "pass": true
+ },
+ {
+  "name": "BELL: read state persists after refresh (no unread button shown)",
+  "pass": true
+ },
+ {
+  "name": "BELL: mobile header bell is present and tappable (>=44px)",
+  "pass": true
+ },
+ {
+  "name": "NO uncaught page errors during the whole run",
+  "pass": true
+ }
+]

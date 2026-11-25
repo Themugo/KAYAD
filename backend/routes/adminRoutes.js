@@ -610,17 +610,12 @@ router.post(
       userId: user._id,
       eventType: COMMUNICATION_EVENTS.DEALER_VERIFIED,
       title: "Dealer account approved",
-      message: "Your dealer account has been approved. You can now list vehicles and access dealer features.",
+      message: "Your dealer account has been approved. You can now list vehicles, manage your inventory, leads and staff, and your business profile is open to buyers.",
       channels: ["in_app", "email", "sms", "whatsapp"],
-      metadata: { userId: user._id },
+      metadata: { userId: user._id, link: "/?nav=dealer-dashboard" },
     }).catch((e) => console.warn("⚠️ Dealer approval communication failed:", e.message));
 
-    sendNotification({
-      userId: user._id,
-      title: "Seller Account Approved",
-      message: "Your seller account has been approved. You can now list vehicles and access seller features.",
-      type: "info",
-    }).catch((e) => console.warn("⚠️ Admin notification failed:", e.message));
+
 
 res.json({
       success: true,

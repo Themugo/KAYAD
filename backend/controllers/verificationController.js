@@ -34,6 +34,17 @@ export const submitVerification = async (req, res) => {
       message: "We've received your dealer application. It is now waiting for review — you will be notified of the decision. Receiving your application does not mean your dealer account is approved yet.",
       type: "verification",
     }).catch((e) => logError("Dealer application acknowledgement failed", e));
+    // Tell the platform team an application is now reviewable (best effort; in-app only so it never e-mails every admin).
+    try {
+      const applicant = await findById("users", req.user.id, "id,name,email,businessName");
+      const admins = await findAll("users", { filters: { role: { $in: ["admin", "superadmin"] } }, select: "id", limit: 50 });
+      await Promise.all((admins || []).map((a) => sendNotification({
+        userId: a.id, channels: [], type: "verification", link: "/?nav=admin",
+        title: "Dealer application ready for review",
+        message: `${applicant?.businessName || applicant?.name || "A dealer"} (${applicant?.email || "no e-mail"}) submitted a dealer application and is waiting for a decision.`,
+        data: { dealerUserId: String(req.user.id) },
+      })));
+    } catch (e) { logError("Admin dealer-application notification failed", e); }
     return res.json({ success: true, message: "Verification submitted successfully", verification: result.verification, progress: result.progress });
   } catch (err) {
     logError("Submit verification error", err);

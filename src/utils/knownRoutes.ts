@@ -9,7 +9,7 @@ const EXACT = new Set([
   '/dashboard', '/buyer-platform', '/seller-platform', '/seller-dashboard', '/dealer', '/inspector/dashboard', '/dealer/setup', '/dealer/onboarding',
   '/dealer/auction-setup', '/dealer/auction-operations', '/terms', '/privacy', '/admin',
 ]);
-const PREFIXES = ['/admin/', '/auction/', '/cars/', '/dealer/auction-operations/'];
+const PREFIXES = ['/admin/', '/auction/', '/cars/', '/showroom/', '/dealer/auction-operations/'];
 
 export function isKnownPath(pathname: string): boolean {
   const p = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;

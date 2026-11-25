@@ -1180,10 +1180,12 @@ router.post(
     // Notify bidder
     try {
       if (typeof sendNotification === "function") {
-        sendNotification(
-          bid.user,
-          `Your bid of KES ${Number(bid.amount).toLocaleString()} on ${car.title} was declined.`,
-        ).catch((e) => console.warn("⚠️ Bid decline notification failed:", e.message));
+        sendNotification({
+          userId: bid.user,
+          title: "Bid declined",
+          message: `Your bid of KES ${Number(bid.amount).toLocaleString()} on ${car.title} was declined.`,
+          type: "bid",
+        }).catch((e) => console.warn("⚠️ Bid decline notification failed:", e.message));
       }
     } catch {
       /* non-critical */

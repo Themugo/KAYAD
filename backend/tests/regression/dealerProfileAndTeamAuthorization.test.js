@@ -52,7 +52,7 @@ jest.unstable_mockModule("../../middleware/dealerOrgAccess.js", () => ({
 
 const ctrl = await import("../../controllers/dealerPlatformController.js");
 
-const mkRes = () => { const r = { statusCode: 200, body: null }; r.status = (c) => { r.statusCode = c; return r; }; r.json = (b) => { r.body = b; return r; }; return r; };
+const mkRes = () => { const r = { statusCode: 200, body: null }; r.status = (c) => { r.statusCode = c; return r; }; r.headers = {}; r.set = (k, v) => { r.headers[k] = v; return r; }; r.json = (b) => { r.body = b; return r; }; return r; };
 const call = async (fn, req) => { const res = mkRes(); await fn({ ip: "127.0.0.1", get: () => "jest", id: "req1", params: {}, body: {}, ...req }, res); return res; };
 const dealerUser = (id = D1, extra = {}) => ({ id, role: "dealer", name: "Amani", email: "owner@amani.test", ...extra });
 
@@ -294,5 +294,41 @@ describe("route wiring (source assertions: guard order, limiter, optionalAuth)",
     expect(src).toMatch(/team\/invite", protect, dealerOrgAccess\("canManageTeam"\)/);
     expect(src).toMatch(/team\/:memberId", protect, dealerOrgAccess\("canManageTeam"\), createLimiter, asyncHandler\(updateTeamMember\)/);
     expect(src).toMatch(/router\.delete\("\/team\/:memberId", protect, dealerOrgAccess\("canManageTeam"\), createLimiter/);
+  });
+});
+
+describe("getDealerProfile — public storefront visibility and allowlist", () => {
+  const get = (user, id = D1) => call(ctrl.getDealerProfile, { user, params: { dealerId: id } });
+  test("response holds only allowlisted keys (no personal name, email, status or documents)", async () => {
+    const r = await get(undefined);
+    const allowed = ["id", "businessName", "bio", "location", "logoUrl", "bannerUrl", "approved", "verified", "publiclyVisible", "memberSince", "stats"];
+    expect(Object.keys(r.body.data).filter((k) => !allowed.includes(k))).toEqual([]);
+    expect(JSON.stringify(r.body)).not.toMatch(/owner@amani\.test|"name":"Amani"/);
+  });
+  test("a pending dealership is 404 for the public and other users, visible to its owner and platform staff", async () => {
+    store.dealers[D1].approved = false;
+    expect((await get(undefined)).statusCode).toBe(404);
+    expect((await get({ id: B1, role: "user" })).statusCode).toBe(404);
+    expect((await get(dealerUser(D2))).statusCode).toBe(404);
+    const own = await get(dealerUser());
+    expect(own.statusCode).toBe(200);
+    expect(own.body.data.publiclyVisible).toBe(false);
+    expect((await get({ id: "adm", role: "admin" })).statusCode).toBe(200);
+  });
+  test("a suspended dealership disappears from the public view", async () => {
+    store.dealers[D1].isSuspended = true;
+    expect((await get(undefined)).statusCode).toBe(404);
+    expect((await get(dealerUser())).statusCode).toBe(200);
+  });
+  test("only Cloudinary https images are returned as logo/banner", async () => {
+    store.dealers[D1].logoUrl = "https://evil.example/x.png";
+    store.dealers[D1].bannerUrl = "https://res.cloudinary.com/demo/image/upload/v1/b.png";
+    const r = await get(undefined);
+    expect(r.body.data.logoUrl).toBeNull();
+    expect(r.body.data.bannerUrl).toMatch(/^https:\/\/res\.cloudinary\.com\//);
+  });
+  test("public responses are cacheable, owner responses are not", async () => {
+    expect((await get(undefined)).headers["Cache-Control"]).toMatch(/public/);
+    expect((await get(dealerUser())).headers["Cache-Control"]).toMatch(/no-store/);
   });
 });

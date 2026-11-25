@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import * as dealerApi from '../../../services/dealerPlatformApi';
 import { communicationsAPI, dealerAPI } from '../../../api/api';
+import { api as httpApi } from '../../../api/httpClient';
 import { Bell, Building2, Landmark, Users, CreditCard } from 'lucide-react';
 
 /**
@@ -44,6 +45,33 @@ function ProfileSection({ userId }: { userId: string }) {
   const [currentPassword, setCurrentPassword] = useState('');
   const savingRef = useRef(false);
 
+  const [media, setMedia] = useState<{ logoUrl: string | null; bannerUrl: string | null; publiclyVisible: boolean }>({ logoUrl: null, bannerUrl: null, publiclyVisible: false });
+  const [mediaBusy, setMediaBusy] = useState<null | 'logoUrl' | 'bannerUrl'>(null);
+  const [mediaError, setMediaError] = useState<string | null>(null);
+  const uploadMedia = async (kind: 'logoUrl' | 'bannerUrl', file: File | undefined) => {
+    if (!file || mediaBusy) return;
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) { setMediaError('Choose a JPG, PNG or WebP image.'); return; }
+    if (file.size > 5 * 1024 * 1024) { setMediaError('That image is larger than 5 MB. Choose a smaller one.'); return; }
+    setMediaBusy(kind); setMediaError(null);
+    try {
+      const fd = new FormData(); fd.append('file', file); fd.append('folder', 'dealers');
+      const up: any = await httpApi.post('/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      const url = up?.data?.url;
+      if (!url) throw new Error('upload');
+      const res: any = await dealerApi.updateDealerProfile(userId, { [kind]: url });
+      if (res?.success === false) throw new Error(res.message || 'save');
+      setMedia((m) => ({ ...m, [kind]: res?.data?.[kind] ?? url }));
+    } catch (err: any) {
+      setMediaError(err?.response?.data?.message || 'The image could not be uploaded. Your current image is unchanged. Please try again.');
+    } finally { setMediaBusy(null); }
+  };
+  const clearMedia = async (kind: 'logoUrl' | 'bannerUrl') => {
+    if (mediaBusy) return; setMediaBusy(kind); setMediaError(null);
+    try { await dealerApi.updateDealerProfile(userId, { [kind]: '' }); setMedia((m) => ({ ...m, [kind]: null })); }
+    catch { setMediaError('The image could not be removed. Please try again.'); }
+    finally { setMediaBusy(null); }
+  };
+
   const [verification, setVerification] = useState<{ stage: string; status?: string } | null>(null);
   const [verificationError, setVerificationError] = useState(false);
   const [verificationRetry, setVerificationRetry] = useState(0);
@@ -59,6 +87,7 @@ function ProfileSection({ userId }: { userId: string }) {
         if (!d) { setLoadError(classifyLoadFailure({ status: 500 }, 'dealership profile')); return; }
         setForm({ businessName: d.businessName || '', location: d.location || '', bio: d.bio || '', phone: d.phone || '' });
         setSavedPhone(d.phone || '');
+        setMedia({ logoUrl: d.logoUrl || null, bannerUrl: d.bannerUrl || null, publiclyVisible: Boolean(d.publiclyVisible) });
         setDirty(false);
       })
       .catch((err) => { if (!cancelled) setLoadError(classifyLoadFailure(err, 'dealership profile')); })
@@ -149,6 +178,31 @@ function ProfileSection({ userId }: { userId: string }) {
           <p className="text-sm text-[#0A3340]" data-testid="verification-stage">{STAGE_LABELS[verification.stage] || STAGE_LABELS.unknown}</p>
         )}
         <p className="text-xs text-[#475569] mt-1">Approval is decided by KAYARD KE staff. This card is read-only.</p>
+      </section>
+
+      <section aria-labelledby="storefront-heading" className="p-4 rounded-xl bg-white border border-[#D7E7E4]">
+        <h3 id="storefront-heading" className="text-base font-bold text-[#0A3340] mb-1">Public storefront</h3>
+        <p className="text-xs text-[#475569] mb-3">{media.publiclyVisible ? 'Your storefront is live. Buyers see your logo, banner, description, location and published vehicles.' : 'Your storefront goes live once KAYARD KE approves your dealership. You can prepare it now and preview it here.'}</p>
+        {mediaError && <p role="alert" className="mb-3 text-sm text-[#B42318]">{mediaError}</p>}
+        <div className="grid gap-4 sm:grid-cols-2">
+          {([['logoUrl', 'Business logo'], ['bannerUrl', 'Cover banner']] as const).map(([kind, label]) => (
+            <div key={kind}>
+              <p className="text-sm font-medium text-[#0A3340] mb-1">{label}</p>
+              <div className="mb-2 grid h-24 place-items-center overflow-hidden rounded-lg border border-[#B9D3CF] bg-[#F6FAF9]">
+                {media[kind] ? <img src={media[kind] as string} alt={`${label} preview`} className="h-full w-full object-contain" /> : <span className="text-xs text-[#64748b]">No image yet</span>}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <label className={`inline-flex min-h-10 cursor-pointer items-center rounded-lg border border-[#176B87] px-3 text-sm font-semibold text-[#0A3340] ${mediaBusy ? 'opacity-60 cursor-not-allowed' : ''}`}>
+                  {mediaBusy === kind ? 'Uploading…' : media[kind] ? 'Change' : 'Upload'}
+                  <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={Boolean(mediaBusy)} onChange={(e) => { void uploadMedia(kind, e.target.files?.[0]); e.target.value = ''; }} />
+                </label>
+                {media[kind] && <button type="button" disabled={Boolean(mediaBusy)} onClick={() => void clearMedia(kind)} className="min-h-10 rounded-lg border border-[#B9D3CF] px-3 text-sm text-[#475569]">Remove</button>}
+              </div>
+            </div>
+          ))}
+        </div>
+        <a href={`/showroom/${encodeURIComponent(userId)}`} target="_blank" rel="noreferrer" className="mt-4 inline-flex min-h-10 items-center rounded-lg bg-[#176B87] px-4 text-sm font-semibold text-white">Preview public page</a>
+        <p className="mt-2 text-xs text-[#475569]">Business name, location and description are edited below. Verification is decided by KAYARD KE staff.</p>
       </section>
 
       <section aria-labelledby="profile-heading">

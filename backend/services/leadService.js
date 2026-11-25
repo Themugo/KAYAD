@@ -4,6 +4,7 @@
 // Manages lead creation, updates, and analytics
 // ─────────────────────────────────────────────────────────────
 
+import { notifyDealership } from "./dealershipNotifications.service.js";
 import { addTimelineEvent, getLeadTimeline } from "./leadTimelineService.js";
 import { evaluateEligibilityBatch } from "./privateSellerAuctionEligibility.service.js";
 import { logInfo, logError } from "../utils/logger.js";
@@ -23,9 +24,10 @@ export const createLead = async (buyerId, dealerId, vehicleId, source, reference
 export const resolveLead = async (buyerId, dealerId, vehicleId, source, referenceId) => {
   try {
     let estimatedValue = 0;
+    let vehicleTitle = "";
     if (vehicleId) {
       const vehicle = await findById("cars", vehicleId);
-      if (vehicle) estimatedValue = Number(vehicle.price || 0);
+      if (vehicle) { estimatedValue = Number(vehicle.price || 0); vehicleTitle = String(vehicle.title || [vehicle.brand, vehicle.model].filter(Boolean).join(" ") || ""); }
     }
     const { data, error } = await getSupabase().rpc("kayad_create_lead_atomic", {
       p_buyer: buyerId || null, p_dealer: dealerId || null, p_vehicle: vehicleId || null,
@@ -36,6 +38,17 @@ export const resolveLead = async (buyerId, dealerId, vehicleId, source, referenc
     const created = data?.created !== false;
     if (created) {
       await addTimelineEvent(lead.id, "lead_created", buyerId, "buyer", `Lead created from ${source}`, { source, referenceId });
+      // Tell the dealership (owner, plus staff who handle buyers) that a new enquiry is waiting. Best-effort: never fails the enquiry.
+      if (dealerId) {
+        await notifyDealership(dealerId, {
+          permission: "canChatBuyers",
+          title: "New enquiry",
+          message: vehicleTitle ? `A buyer is interested in ${vehicleTitle}. Open Leads to reply.` : "A buyer has contacted your dealership. Open Leads to reply.",
+          type: "lead",
+          link: "/?nav=dealer-dashboard&section=leads",
+          data: { leadId: lead.id, vehicleId: vehicleId || null, source },
+        });
+      }
     }
     logInfo("Lead resolved", { leadId: lead.id, buyerId, dealerId, source, created });
     return { lead, created };

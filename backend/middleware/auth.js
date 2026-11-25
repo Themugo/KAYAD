@@ -320,6 +320,9 @@ export const optionalAuth = async (req, res, next) => {
     if (authHeader && authHeader.startsWith("Bearer ")) {
       token = authHeader.split(" ")[1];
     }
+    // Same credential sources as protect(): the browser session is the httpOnly `token` cookie, so a signed-in owner is recognised on public
+    // routes (own-profile preview, owner-only fields) exactly as on protected ones.
+    if (!token && req.cookies?.token) token = req.cookies.token;
 
     if (!token) return next();
 
