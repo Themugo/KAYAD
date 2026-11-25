@@ -1,0 +1,385 @@
+[
+ {
+  "name": "320px: overview rendered, no horizontal page overflow",
+  "pass": true
+ },
+ {
+  "name": "320px: overview buttons are at least 36px tall",
+  "pass": true
+ },
+ {
+  "name": "320px: workspace starts at the very top of the page (no band above it)",
+  "pass": true
+ },
+ {
+  "name": "320px: hero follows the header with no dead band (gap 132px)",
+  "pass": true
+ },
+ {
+  "name": "320px: no page errors, no failed API calls",
+  "pass": true
+ },
+ {
+  "name": "360px: overview rendered, no horizontal page overflow",
+  "pass": true
+ },
+ {
+  "name": "360px: overview buttons are at least 36px tall",
+  "pass": true
+ },
+ {
+  "name": "360px: workspace starts at the very top of the page (no band above it)",
+  "pass": true
+ },
+ {
+  "name": "360px: hero follows the header with no dead band (gap 132px)",
+  "pass": true
+ },
+ {
+  "name": "360px: no page errors, no failed API calls",
+  "pass": true
+ },
+ {
+  "name": "390px: overview rendered, no horizontal page overflow",
+  "pass": true
+ },
+ {
+  "name": "390px: overview buttons are at least 36px tall",
+  "pass": true
+ },
+ {
+  "name": "390px: workspace starts at the very top of the page (no band above it)",
+  "pass": true
+ },
+ {
+  "name": "390px: hero follows the header with no dead band (gap 132px)",
+  "pass": true
+ },
+ {
+  "name": "390px: no page errors, no failed API calls",
+  "pass": true
+ },
+ {
+  "name": "430px: overview rendered, no horizontal page overflow",
+  "pass": true
+ },
+ {
+  "name": "430px: overview buttons are at least 36px tall",
+  "pass": true
+ },
+ {
+  "name": "430px: workspace starts at the very top of the page (no band above it)",
+  "pass": true
+ },
+ {
+  "name": "430px: hero follows the header with no dead band (gap 112px)",
+  "pass": true
+ },
+ {
+  "name": "430px: no page errors, no failed API calls",
+  "pass": true
+ },
+ {
+  "name": "768px: overview rendered, no horizontal page overflow",
+  "pass": true
+ },
+ {
+  "name": "768px: workspace starts at the very top of the page (no band above it)",
+  "pass": true
+ },
+ {
+  "name": "768px: hero follows the header with no dead band (gap 59px)",
+  "pass": true
+ },
+ {
+  "name": "768px: no page errors, no failed API calls",
+  "pass": true
+ },
+ {
+  "name": "1024px: overview rendered, no horizontal page overflow",
+  "pass": true
+ },
+ {
+  "name": "1024px: workspace starts at the very top of the page (no band above it)",
+  "pass": true
+ },
+ {
+  "name": "1024px: hero follows the header with no dead band (gap 59px)",
+  "pass": true
+ },
+ {
+  "name": "1024px: hero is in the first screen, under the top bar",
+  "pass": true
+ },
+ {
+  "name": "1024px: workspace is full width (not boxed)",
+  "pass": true
+ },
+ {
+  "name": "1024px: sidebar is exactly one viewport tall, pinned top-left",
+  "pass": true
+ },
+ {
+  "name": "1024px: sidebar blocks stack without overlap (brand, add, groups, footer)",
+  "pass": true
+ },
+ {
+  "name": "1024px: the groups list is not its own scroller and the footer is not pinned",
+  "pass": true
+ },
+ {
+  "name": "1024px: when the sidebar overflows, its header scrolls together with its body",
+  "pass": true
+ },
+ {
+  "name": "1024px: the page scrolls as a document; sidebar and top bar stay in place",
+  "pass": true
+ },
+ {
+  "name": "1024px: no page errors, no failed API calls",
+  "pass": true
+ },
+ {
+  "name": "1280px: overview rendered, no horizontal page overflow",
+  "pass": true
+ },
+ {
+  "name": "1280px: workspace starts at the very top of the page (no band above it)",
+  "pass": true
+ },
+ {
+  "name": "1280px: hero follows the header with no dead band (gap 59px)",
+  "pass": true
+ },
+ {
+  "name": "1280px: hero is in the first screen, under the top bar",
+  "pass": true
+ },
+ {
+  "name": "1280px: workspace is full width (not boxed)",
+  "pass": true
+ },
+ {
+  "name": "1280px: sidebar is exactly one viewport tall, pinned top-left",
+  "pass": true
+ },
+ {
+  "name": "1280px: sidebar blocks stack without overlap (brand, add, groups, footer)",
+  "pass": true
+ },
+ {
+  "name": "1280px: the groups list is not its own scroller and the footer is not pinned",
+  "pass": true
+ },
+ {
+  "name": "1280px: when the sidebar overflows, its header scrolls together with its body",
+  "pass": true
+ },
+ {
+  "name": "1280px: the page scrolls as a document; sidebar and top bar stay in place",
+  "pass": true
+ },
+ {
+  "name": "1280px: no page errors, no failed API calls",
+  "pass": true
+ },
+ {
+  "name": "1280px: axe (WCAG 2.x A/AA) on the dashboard: no violations",
+  "pass": true
+ },
+ {
+  "name": "1440px: overview rendered, no horizontal page overflow",
+  "pass": true
+ },
+ {
+  "name": "1440px: workspace starts at the very top of the page (no band above it)",
+  "pass": true
+ },
+ {
+  "name": "1440px: hero follows the header with no dead band (gap 37px)",
+  "pass": true
+ },
+ {
+  "name": "1440px: hero is in the first screen, under the top bar",
+  "pass": true
+ },
+ {
+  "name": "1440px: workspace is full width (not boxed)",
+  "pass": true
+ },
+ {
+  "name": "1440px: sidebar is exactly one viewport tall, pinned top-left",
+  "pass": true
+ },
+ {
+  "name": "1440px: sidebar blocks stack without overlap (brand, add, groups, footer)",
+  "pass": true
+ },
+ {
+  "name": "1440px: the groups list is not its own scroller and the footer is not pinned",
+  "pass": true
+ },
+ {
+  "name": "1440px: when the sidebar overflows, its header scrolls together with its body",
+  "pass": true
+ },
+ {
+  "name": "1440px: the page scrolls as a document; sidebar and top bar stay in place",
+  "pass": true
+ },
+ {
+  "name": "1440px: no page errors, no failed API calls",
+  "pass": true
+ },
+ {
+  "name": "1440px: axe (WCAG 2.x A/AA) on the dashboard: no violations",
+  "pass": true
+ },
+ {
+  "name": "Ctrl K focuses the vehicle search",
+  "pass": true
+ },
+ {
+  "name": "table tabs rendered as an accessible tablist",
+  "pass": true
+ },
+ {
+  "name": "ArrowRight moves to the next tab and selects it",
+  "pass": true
+ },
+ {
+  "name": "period selector re-requests the command centre with days=7",
+  "pass": true
+ },
+ {
+  "name": "period selector also supports 90 days",
+  "pass": true
+ },
+ {
+  "name": "sidebar \"Inventory\" opens ?section=inventory",
+  "pass": true
+ },
+ {
+  "name": "sidebar \"Leads\" opens ?section=leads",
+  "pass": true
+ },
+ {
+  "name": "sidebar \"Pipeline\" opens ?section=pipeline",
+  "pass": true
+ },
+ {
+  "name": "sidebar \"Customers\" opens ?section=customers",
+  "pass": true
+ },
+ {
+  "name": "sidebar \"Auctions\" opens ?section=auctions",
+  "pass": true
+ },
+ {
+  "name": "sidebar \"Payouts\" opens ?section=banking",
+  "pass": true
+ },
+ {
+  "name": "sidebar \"Inspections\" opens ?section=inspections",
+  "pass": true
+ },
+ {
+  "name": "sidebar \"Escrow\" opens ?section=escrow",
+  "pass": true
+ },
+ {
+  "name": "sidebar \"Finance\" opens ?section=finance",
+  "pass": true
+ },
+ {
+  "name": "sidebar \"Team & Permissions\" opens ?section=team",
+  "pass": true
+ },
+ {
+  "name": "sidebar \"Reports & Analytics\" opens ?section=analytics",
+  "pass": true
+ },
+ {
+  "name": "sidebar \"Reputation\" opens ?section=reputation",
+  "pass": true
+ },
+ {
+  "name": "sidebar \"Marketing\" opens ?section=marketing",
+  "pass": true
+ },
+ {
+  "name": "sidebar \"Settings\" opens ?section=settings",
+  "pass": true
+ },
+ {
+  "name": "Sales operations group collapses",
+  "pass": true
+ },
+ {
+  "name": "Sales operations group expands again",
+  "pass": true
+ },
+ {
+  "name": "1750px: overview rendered, no horizontal page overflow",
+  "pass": true
+ },
+ {
+  "name": "1750px: workspace starts at the very top of the page (no band above it)",
+  "pass": true
+ },
+ {
+  "name": "1750px: hero follows the header with no dead band (gap 37px)",
+  "pass": true
+ },
+ {
+  "name": "1750px: hero is in the first screen, under the top bar",
+  "pass": true
+ },
+ {
+  "name": "1750px: workspace is full width (not boxed)",
+  "pass": true
+ },
+ {
+  "name": "1750px: sidebar is exactly one viewport tall, pinned top-left",
+  "pass": true
+ },
+ {
+  "name": "1750px: sidebar blocks stack without overlap (brand, add, groups, footer)",
+  "pass": true
+ },
+ {
+  "name": "1750px: the groups list is not its own scroller and the footer is not pinned",
+  "pass": true
+ },
+ {
+  "name": "1750px: when the sidebar overflows, its header scrolls together with its body",
+  "pass": true
+ },
+ {
+  "name": "1750px: the page scrolls as a document; sidebar and top bar stay in place",
+  "pass": true
+ },
+ {
+  "name": "1750px: no page errors, no failed API calls",
+  "pass": true
+ },
+ {
+  "name": "1750px: axe (WCAG 2.x A/AA) on the dashboard: no violations",
+  "pass": true
+ },
+ {
+  "name": "role viewer browser check",
+  "pass": true,
+  "notRun": true
+ },
+ {
+  "name": "role sales_agent browser check",
+  "pass": true,
+  "notRun": true
+ },
+ {
+  "name": "role finance_officer browser check",
+  "pass": true,
+  "notRun": true
+ }
+]

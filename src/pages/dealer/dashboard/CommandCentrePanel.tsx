@@ -26,6 +26,7 @@ export type CommandCentreData = {
   team?: { outstandingInvitations: number; expiredInvitations: number; activeMembers: number; invitations: Array<{ id: string; email: string; role: string }>; changes: Array<{ id: string; message: string; at: string }>; activity: Array<{ id: string; message: string; at: string }> };
   /** A delegated member's OWN recent authorised activity (never other members'). */
   myActivity?: Array<{ id: string; action: string; at: string }>;
+  period?: unknown; health?: unknown; leadCounts?: Record<string, number>; pipeline?: Record<string, number>;
   attention?: Array<{ id: string; label: string; count: number; severity: 'critical' | 'warning' | 'info'; target: { section: string }; detail?: string }>;
   truncated?: string[];
   /** Source tables the connected database does not have yet; the figures that depend on them are hidden, never shown as zero. */
@@ -44,7 +45,7 @@ const endsIn = (iso?: string | null) => {
 const SEVERITY: Record<string, string> = { critical: 'border-[#FDA29B] bg-[#FEF3F2] text-[#7A271A]', warning: 'border-[#FEDF89] bg-[#FFFAEB] text-[#7A2E0E]', info: 'border-[#B8DDD8] bg-[#EEF8F6] text-[#0A3340]' };
 const SEVERITY_LABEL: Record<string, string> = { critical: 'Urgent', warning: 'Soon', info: 'New' };
 
-type Props = { data: CommandCentreData | null; loading: boolean; unavailable?: boolean; onOpen: (section: string) => void; onRetry?: () => void };
+type Props = { data: CommandCentreData | null; loading: boolean; unavailable?: boolean; onOpen: (section: string) => void; onRetry?: () => void; /** The overview renders the attention queue itself, so the panel omits its copy. */ hideAttention?: boolean };
 
 const Tile = ({ label, value, hint, onClick, testId }: { label: string; value: React.ReactNode; hint?: string; onClick?: () => void; testId?: string }) => {
   const inner = (<><p className="text-[11px] font-semibold uppercase tracking-wide text-[#64748B]">{label}</p><p className="mt-1 break-words text-lg font-bold leading-tight text-[#0A3340] sm:text-xl">{value}</p>{hint && <p className="mt-0.5 text-xs text-[#475569]">{hint}</p>}</>);
@@ -64,7 +65,7 @@ const Section = ({ id, title, icon: Icon, action, children }: { id: string; titl
   </section>
 );
 
-export default function CommandCentrePanel({ data, loading, unavailable, onOpen, onRetry }: Props) {
+export default function CommandCentrePanel({ data, loading, unavailable, onOpen, onRetry, hideAttention }: Props) {
   if (loading) {
     return <div className="mb-5 space-y-3" role="status" aria-label="Loading command centre" data-testid="command-centre-loading">{[0, 1, 2].map((i) => <div key={i} className="h-24 animate-pulse rounded-xl bg-[#E1EDEB]" />)}</div>;
   }
@@ -86,7 +87,7 @@ export default function CommandCentrePanel({ data, loading, unavailable, onOpen,
       {data.truncated && data.truncated.length > 0 && <p role="status" className="rounded-lg border border-[#FEDF89] bg-[#FFFAEB] p-3 text-sm text-[#7A2E0E]" data-testid="command-centre-truncated">Very large history: some figures may be incomplete ({data.truncated.join(', ')}). Contact support to reconcile.</p>}
       {nothing && <p className="rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] p-3 text-sm text-[#475569]">Your role has no dashboard sections. Ask the dealership owner for access.</p>}
 
-      {!nothing && (
+      {!nothing && !hideAttention && (
         <Section id="cc-attention" title="Needs your attention" icon={AlertCircle}>
           {attention.length === 0 ? (
             <p className="flex items-center gap-2 rounded-lg bg-white p-3 text-sm text-[#475569]" data-testid="attention-empty"><CheckCircle2 className="h-4 w-4 text-emerald-700" aria-hidden="true" />Nothing needs your attention right now.</p>

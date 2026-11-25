@@ -8,9 +8,11 @@ describe('1105b sweep', () => {
       expect(titleForRoute(p, '')).toContain(t);
     }
   });
-  it('dealer mobile nav scrolls inside itself and is the positioning context', () => {
+  it('dealer sidebar is ONE continuous scroller (the aside) and the nav is only the positioning context', () => {
     const s = fs.readFileSync('src/pages/dealer/dashboard/DealerDashboard.tsx', 'utf8');
-    expect(s).toMatch(/<nav[^>]*relative flex-1[^>]*overflow-y-auto/);
+    expect(s).toMatch(/<aside[^>]*data-testid="dealer-sidebar"[^>]*overflow-y-auto/);
+    expect(s).toMatch(/<nav aria-label="Dealer workspace" className=\{`relative shrink-0/);
+    expect(s).not.toMatch(/<nav[^>]*overflow-y-auto/);
   });
   it('FAQ answers cover commitments, refunds and winning', () => {
     const s = fs.readFileSync('src/features/SupportFAQ.tsx', 'utf8');

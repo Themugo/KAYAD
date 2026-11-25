@@ -106,7 +106,8 @@ export async function getCommandCentre(req, res) {
     // Delegated members carry their membership (permissions); the owner and staff keep the existing full behaviour.
     const org = req.actingMember && req.dealerOrg ? req.dealerOrg : { isOwner: true, permissions: {} };
     // `actorId` is the authenticated member (never a request value): it only scopes the member's OWN recent activity.
-    const data = await loadCommandCentre({ dealerId, org, actorId: req.actingMember ? req.actingMember.id : null });
+    const requestedDays = Number(req.query?.days);
+    const data = await loadCommandCentre({ dealerId, org, actorId: req.actingMember ? req.actingMember.id : null, days: [7, 30, 90].includes(requestedDays) ? requestedDays : 30 });
     res.set("Cache-Control", "private, no-store");
     res.json({ success: true, data });
   } catch (err) {

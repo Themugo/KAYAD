@@ -609,7 +609,9 @@ function AppInner() {
         tabIndex={-1}
         data-kayad-surface={activeNav}
         className={
-          isMarketplaceSurface
+          activeNav === 'dealer-dashboard'
+            ? 'flex-1 w-full min-w-0 max-w-none mx-0 p-0 space-y-0'
+            : isMarketplaceSurface
             ? `${publicShellClass}flex-1 w-full min-w-0 max-w-none mx-0 px-0 py-0 ${showPublicMobileDock ? 'pb-[calc(7rem+env(safe-area-inset-bottom)+12px)]' : ''} lg:pb-0 space-y-0 overflow-x-clip`
             : `${publicShellClass}flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 ${showPublicMobileDock ? 'pb-[calc(7rem+env(safe-area-inset-bottom)+12px)]' : 'pb-6'} lg:pb-6 space-y-6`
         }
@@ -617,7 +619,8 @@ function AppInner() {
         {/* The public marketplace home starts directly beneath the global navbar.
             Keep page-history controls on internal routes, but do not insert a
             second navigation band above the homepage hero. */}
-        {activeNav !== 'marketplace' && <PageJourneyNavigation adminHref={isAdmin ? '/admin' : undefined} />}
+        {/* The dealer workspace is full-bleed and carries its own page-history controls in its header. */}
+        {activeNav !== 'marketplace' && activeNav !== 'dealer-dashboard' && <PageJourneyNavigation adminHref={isAdmin ? '/admin' : undefined} />}
         <Suspense fallback={
           <div className="min-h-[420px] flex items-center justify-center px-6" role="status" aria-live="polite">
             <div className="text-center">

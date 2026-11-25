@@ -29,24 +29,22 @@ describe('Dealer workspace navigation (Phase 14.2)', () => {
   beforeEach(() => { window.history.replaceState({}, '', '/?nav=dealer-dashboard'); });
   afterEach(() => { cleanup(); });
 
-  it('groups the existing sections under the five Command Centre groups', async () => {
+  it('groups the existing sections under the three Command Centre groups', async () => {
     renderIt();
     const n = await nav();
     const groups = within(n).getAllByRole('group').map((g) => g.getAttribute('aria-labelledby'));
-    expect(groups).toEqual(['dealer-nav-overview', 'dealer-nav-sales', 'dealer-nav-finance', 'dealer-nav-growth', 'dealer-nav-people']);
+    expect(groups).toEqual(['dealer-nav-overview', 'dealer-nav-sales', 'dealer-nav-business']);
     const names = (id: string) => within(within(n).getByRole('group', { name: id })).getAllByRole('button').map((b) => b.querySelector('span.font-medium')?.textContent).filter(Boolean);
     expect(names('Overview')).toEqual(['Dashboard']);
-    expect(names('Sales operations')).toEqual(['Inventory', 'Leads', 'Pipeline', 'Customers', 'Auctions', 'Inspections']);
-    expect(names('Transactions & finance')).toEqual(['Escrow', 'Finance']);
-    expect(names('Business growth')).toEqual(['Analytics', 'Reputation', 'Marketing']);
-    expect(names('People & business')).toEqual(['Team & Employment', 'Banking', 'Settings']);
+    expect(names('Sales operations')).toEqual(['Inventory', 'Leads', 'Pipeline', 'Customers', 'Auctions', 'Payouts', 'Inspections', 'Escrow', 'Finance']);
+    expect(names('Business management')).toEqual(['Team & Permissions', 'Reports & Analytics', 'Reputation', 'Marketing', 'Settings']);
   });
 
   it('keeps all 14 original sections reachable plus the new Banking item (none removed)', async () => {
     renderIt();
     const n = await nav();
-    // 15 destinations + 5 collapsible group headings
-    expect(within(n).getAllByRole('button')).toHaveLength(20);
+    // 15 destinations + 2 collapsible group headings (the Overview group has no heading)
+    expect(within(n).getAllByRole('button')).toHaveLength(17);
   });
 
   it('marks exactly one item as the current page and shows the real new-lead badge', async () => {
@@ -59,14 +57,14 @@ describe('Dealer workspace navigation (Phase 14.2)', () => {
   it('selecting a section updates header, breadcrumb, current page and URL', async () => {
     renderIt();
     const n = await nav();
-    fireEvent.click(within(n).getByRole('button', { name: 'Team & Employment' }));
+    fireEvent.click(within(n).getByRole('button', { name: 'Team & Permissions' }));
     expect(await screen.findByRole('heading', { level: 2, name: 'Team & Employment' })).toBeTruthy();
     expect(window.location.search).toContain('section=team');
     expect(window.location.search).toContain('nav=dealer-dashboard');
     const crumbs = screen.getByRole('navigation', { name: 'Breadcrumb' });
-    expect(within(crumbs).getByText('People & business')).toBeTruthy();
-    expect(crumbs.querySelector('[aria-current="page"]')?.textContent).toBe('Team & Employment');
-    expect(within(n).getByRole('button', { name: 'Team & Employment' }).getAttribute('aria-current')).toBe('page');
+    expect(within(crumbs).getByText('Business management')).toBeTruthy();
+    expect(crumbs.querySelector('[aria-current="page"]')?.textContent).toBe('Team & Permissions');
+    expect(within(n).getByRole('button', { name: 'Team & Permissions' }).getAttribute('aria-current')).toBe('page');
   });
 
   it('opens the section named in the URL on load (refresh / direct link) and ignores unknown sections', async () => {
@@ -95,7 +93,7 @@ describe('Dealer workspace navigation (Phase 14.2)', () => {
     window.history.replaceState({}, '', '/?nav=dealer-dashboard&section=escrow&escrowId=abc');
     renderIt();
     const n = await nav();
-    fireEvent.click(within(n).getByRole('button', { name: 'Team & Employment' }));
+    fireEvent.click(within(n).getByRole('button', { name: 'Team & Permissions' }));
     expect(window.location.search).not.toContain('escrowId');
   });
 
@@ -123,7 +121,7 @@ describe('Dealer workspace navigation (Phase 14.2)', () => {
     try {
       renderIt();
       await nav();
-      fireEvent.click(screen.getByRole('button', { name: 'Notifications' }));
+      fireEvent.click(screen.getByTestId('dealer-topbar-bell'));
       expect(assign).toHaveBeenCalledWith('/notifications');
     } finally {
       Object.defineProperty(window, 'location', { configurable: true, value: original });
@@ -165,7 +163,8 @@ describe('Dealer workspace navigation (Phase 14.2)', () => {
     renderIt();
     await nav();
     expect(screen.getByText('Total Leads')).toBeTruthy();
-    expect(screen.queryByText('Active Leads')).toBeNull();
+    // The command-centre KPI is the open pipeline (new → reserved), a different figure from the legacy all-time "Total Leads" card.
+    expect(screen.getByText('Active Leads')).toBeTruthy();
     expect(screen.getByText('Revenue (released escrow, all time)')).toBeTruthy();
     expect(screen.queryByText(/This Month/)).toBeNull();
     expect(screen.queryByRole('button', { name: /Total Views/ })).toBeNull();

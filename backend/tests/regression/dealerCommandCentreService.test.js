@@ -145,3 +145,37 @@ describe("business, leads, offers, auctions, team", () => {
     });
   });
 });
+
+describe("selected-period figures and business health", () => {
+  const full = { owner: true, inventory: true, leads: true, revenue: true, team: true, auctions: true, finance: true };
+  const mk = (id, status, amount, releasedAt, car) => ({ id, status, amount, commission: 0, sellerAmount: amount, releasedAt, car });
+  const escrows = [mk("a", "released", 1000, "2026-11-20T00:00:00Z", "c1"), mk("b", "closed", 500, "2026-11-10T00:00:00Z", "c2"), mk("c", "released", 700, "2026-10-10T00:00:00Z", "c1"), mk("d", "funded", 9000, null, "c3")];
+  const cars = [{ id: "c1", title: "A", status: "available", price: 10, images: ["x"], views: 3, created_at: "2026-11-15T00:00:00Z" }, { id: "c2", title: "B", status: "available", price: 0, images: [], views: 0, created_at: "2026-09-01T00:00:00Z" }];
+  test("counts only released sales inside the window and compares with the equal previous window", () => {
+    const p = S.summarisePeriod({ cars, escrows, access: full, now: NOW, days: 30 });
+    expect(p.sales.count).toBe(2); expect(p.sales.revenue).toBe(1500); expect(p.sales.previousCount).toBe(1); expect(p.sales.previousRevenue).toBe(700);
+    expect(p.sales.trend.reduce((s, t) => s + t.sold, 0)).toBe(2); expect(p.sales.recent[0].title).toBe("A");
+    expect(p.inventory.added).toBe(1);
+  });
+  test("an unsupported window falls back to 30 days; 7-day window has daily buckets", () => {
+    expect(S.summarisePeriod({ escrows, access: full, now: NOW, days: 12 }).days).toBe(30);
+    expect(S.summarisePeriod({ escrows, access: full, now: NOW, days: 7 }).sales.trend).toHaveLength(7);
+  });
+  test("role gating: no revenue/finance access means no sales or payouts block", () => {
+    const p = S.summarisePeriod({ cars, escrows, payouts: [], access: { inventory: true }, now: NOW });
+    expect(p.sales).toBeUndefined(); expect(p.payouts).toBeUndefined(); expect(p.inventory).toBeDefined();
+  });
+  test("payouts count only paid payouts completed in the window", () => {
+    const p = S.summarisePeriod({ escrows: [], payouts: [{ status: "paid", net_amount: 400, completed_at: "2026-11-15T00:00:00Z" }, { status: "failed", net_amount: 99, completed_at: "2026-11-15T00:00:00Z" }, { status: "paid", net_amount: 50, completed_at: "2026-10-01T00:00:00Z" }], access: full, now: NOW });
+    expect(p.payouts.amount).toBe(400); expect(p.payouts.previousAmount).toBe(50);
+  });
+  test("health is computed from real listing fields; lead response is unavailable", () => {
+    const h = S.summariseHealth({ cars });
+    expect(h.published).toBe(2); expect(h.inventoryQuality.percent).toBe(50); expect(h.listingPerformance.percent).toBe(50); expect(h.leadResponse.percent).toBeNull();
+    expect(S.summariseHealth({ cars: [] }).inventoryQuality.percent).toBeNull();
+  });
+  test("attention gains pending listings and auctions ending soon", () => {
+    const q = S.buildAttentionQueue({ access: full, listings: { draft: 0, pendingApproval: 3 }, leadStats: null, financial: null, team: null, auctions: { endingSoon: 2, outcomesRequiringAttention: 0 } });
+    expect(q.map((i) => i.id)).toEqual(expect.arrayContaining(["pending-listings", "auctions-ending-soon"]));
+  });
+});

@@ -268,3 +268,6 @@ export const useNotifications = (): NotificationContextValue => {
   }
   return ctx;
 };
+
+/** Same value as `useNotifications`, or `null` outside a provider (for screens that must also render in isolation, such as tests). */
+export const useNotificationsSafe = (): NotificationContextValue | null => useContext(NotificationContext);
