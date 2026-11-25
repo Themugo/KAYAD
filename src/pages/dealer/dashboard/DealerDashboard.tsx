@@ -22,6 +22,10 @@ import DealerTeamPanel from './DealerTeamPanel';
 import LeadConversation from './LeadConversation';
 import VehicleRequestsPanel from './VehicleRequestsPanel';
 import CommandCentrePanel, { type CommandCentreData } from './CommandCentrePanel';
+import DealerOverview from './overview/DealerOverview';
+import { PERIOD_OPTIONS, type PeriodDays } from './overview/overviewModel';
+import { useNotificationsSafe } from '../../../context/NotificationContext';
+import './overview/dealerCommandCentre.css';
 import { getMyListings, deleteCar, markCarSold, setCarVisibility } from '../../../services/vehicleApi';
 import { ListingStatusBadge, ListingThumb } from '../../../components/listing/ListingPresentation';
 import type { BackendCar } from '../../../services/vehicleApi';
@@ -224,22 +228,20 @@ const AICopilot = () => (
 );
 
 /** Navigation Tab */
-const NavTab = ({ icon: Icon, label, active, onClick, badge, collapsed = false }: { icon: React.ElementType; label: string; active: boolean; onClick: () => void; badge?: number | string; collapsed?: boolean }) => (
+const NavTab = ({ icon: Icon, label, active, onClick, badge, collapsed = false, badgeLabel = 'new' }: { icon: React.ElementType; label: string; active: boolean; onClick: () => void; badge?: number | string; collapsed?: boolean; badgeLabel?: string }) => (
   <button
     type="button"
     title={collapsed ? label : undefined}
     aria-current={active ? 'page' : undefined}
     onClick={onClick}
-    className={`relative flex w-full items-center ${collapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-2 min-h-10 rounded-lg text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#12D6CB] ${
-      active ? 'bg-[#11B8A6]/20 text-white shadow-[inset_3px_0_0_#12D6CB]' : 'text-white/75 hover:bg-white/10 hover:text-white'
-    }`}
+    className={`dcc-nav-item dcc-focus ${collapsed ? 'justify-center !px-0' : ''}`}
   >
-    <Icon className="w-[18px] h-[18px] shrink-0" strokeWidth={2} aria-hidden="true" />
-    <span className={collapsed ? 'sr-only' : 'font-medium text-sm truncate'}>{label}</span>
+    <Icon className="h-[19px] w-[19px] shrink-0" strokeWidth={1.9} aria-hidden="true" />
+    <span className={collapsed ? 'sr-only' : 'truncate font-medium'}>{label}</span>
     {badge ? (
-      <span className={`${collapsed ? 'absolute right-1 top-0.5 px-1.5 ' : 'ml-auto px-2 '} py-0.5 bg-[#12D6CB] text-[#062A33] text-xs font-black rounded-full`}>
+      <span className={collapsed ? 'dcc-badge absolute right-1 top-0.5 !min-w-0 !px-1.5' : 'dcc-badge'}>
         <span aria-hidden="true">{badge}</span>
-        <span className="sr-only">{badge} new</span>
+        <span className="sr-only">{badge} {badgeLabel}</span>
       </span>
     ) : null}
   </button>
@@ -263,21 +265,17 @@ const DEALER_NAV_GROUPS: NavGroup[] = [
     { id: 'pipeline', label: 'Pipeline', icon: Target, title: 'Lead pipeline', description: 'Enquiries grouped by sales stage.' },
     { id: 'customers', label: 'Customers', icon: Users, title: 'Customers', description: 'Buyers who have dealt with your dealership.' },
     { id: 'auctions', label: 'Auctions', icon: Gavel, title: 'Auctions', description: 'Auctions run by your dealership.' },
+    { id: 'banking', label: 'Payouts', icon: Landmark, title: 'Payouts & banking', description: 'Where your payouts are sent: bank account and M-Pesa.' },
     { id: 'inspections', label: 'Inspections', icon: ClipboardCheck, title: 'Inspections', description: 'Inspection orders on your vehicles.' },
-  ] },
-  { id: 'finance', label: 'Transactions & finance', items: [
     { id: 'escrow', label: 'Escrow', icon: Shield, title: 'Escrow', description: 'Protected transactions on your sales.' },
     { id: 'finance', label: 'Finance', icon: CreditCard, title: 'Finance applications', description: 'Financing applications attached to your vehicles.' },
   ] },
-  { id: 'growth', label: 'Business growth', items: [
-    { id: 'analytics', label: 'Analytics', icon: BarChart3, title: 'Analytics', description: 'Revenue, sales and viewing performance.' },
+  { id: 'business', label: 'Business management', items: [
+    { id: 'team', label: 'Team & Permissions', icon: UserCog, title: 'Team & Employment', description: 'People who work with your dealership account, their staff numbers and employment records.' },
+    { id: 'analytics', label: 'Reports & Analytics', icon: BarChart3, title: 'Analytics', description: 'Revenue, sales and viewing performance.' },
     { id: 'reputation', label: 'Reputation', icon: Star, title: 'Reputation', description: 'Ratings and reviews from buyers.' },
     { id: 'marketing', label: 'Marketing', icon: Megaphone, title: 'Marketing', description: 'Campaigns promoting your vehicles.' },
-  ] },
-  { id: 'people', label: 'People & business', items: [
-    { id: 'team', label: 'Team & Employment', icon: UserCog, title: 'Team & Employment', description: 'People who work with your dealership account, their staff numbers and employment records.' },
-    { id: 'banking', label: 'Banking', icon: Landmark, title: 'Banking', description: 'Where your payouts are sent: bank account and M-Pesa.' },
-    { id: 'settings', label: 'Settings', icon: Settings, title: 'Settings', description: 'Business profile, notifications and your plan and limits. Team and Banking have their own pages in the menu.' },
+    { id: 'settings', label: 'Settings', icon: Settings, title: 'Business profile & settings', description: 'Business profile, notifications and your plan and limits. Team and Payouts have their own pages in the menu.' },
   ] },
 ];
 
@@ -353,6 +351,11 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => { try { return window.localStorage.getItem('kayad.dealer.sidebar') === 'collapsed'; } catch { return false; } });
   const toggleSidebar = () => setSidebarCollapsed((v) => { const next = !v; try { window.localStorage.setItem('kayad.dealer.sidebar', next ? 'collapsed' : 'open'); } catch { /* storage unavailable */ } return next; });
   const [searchText, setSearchText] = useState('');
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const [period, setPeriod] = useState<PeriodDays>(30);
+  const [periodLoading, setPeriodLoading] = useState(false);
+  const notif = useNotificationsSafe();
+  const unreadCount = Number(notif?.unreadCount) || 0;
   const [openLeadChat, setOpenLeadChat] = useState<string | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -582,11 +585,28 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
     else setLoading(false);
   }, [user]);
 
+  // Changing the period re-reads only the command centre (the server computes the selected window); first render is loadDashboard.
+  const periodFirstRun = useRef(true);
   useEffect(() => {
-    if (activeSection === 'inventory' && user && !listingsLoaded) {
+    if (periodFirstRun.current) { periodFirstRun.current = false; return; }
+    if (!user) return;
+    let cancelled = false;
+    setPeriodLoading(true);
+    fetchCommandCentre(period).then((cc) => { if (cancelled) return; if (cc.data) { setCommandCentre(cc.data); setCommandCentreFailed(false); } else setCommandCentreFailed(cc.failed); }).finally(() => { if (!cancelled) setPeriodLoading(false); });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [period]);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k' && searchInputRef.current && searchInputRef.current.offsetParent !== null) { e.preventDefault(); searchInputRef.current.focus(); } };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  useEffect(() => {
+    if ((activeSection === 'inventory' || activeSection === 'overview') && user && !listingsLoaded) {
       setListingsLoading(true);
       setListingsError(null);
-      getMyListings()
+      Promise.resolve(getMyListings())
         .then((data) => { setMyListings(Array.isArray(data) ? data : []); setListingsLoaded(true); })
         .catch((err) => setListingsError(sectionLoadMessage(err, 'inventory')))
         .finally(() => setListingsLoading(false));
@@ -610,17 +630,17 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
   const loadLeads = () => {
     setLeadsLoading(true);
     setLeadsError(null);
-    dealerApi.getLeads({ limit: 100 })
+    Promise.resolve(dealerApi.getLeads({ limit: 100 }))
       .then((body) => { setLeads(body?.data?.items ?? []); setLeadsLoaded(true); })
       .catch((err) => setLeadsError(sectionLoadMessage(err, 'leads')))
       .finally(() => setLeadsLoading(false));
   };
 
   useEffect(() => {
-    if ((activeSection === 'leads' || activeSection === 'pipeline') && user && !leadsLoaded) {
+    if ((activeSection === 'leads' || activeSection === 'pipeline' || (activeSection === 'overview' && !!commandCentre?.leads)) && user && !leadsLoaded) {
       loadLeads();
     }
-  }, [activeSection, user, leadsLoaded]);
+  }, [activeSection, user, leadsLoaded, commandCentre]);
 
   const advanceLeadStage = async (leadId, nextStage) => {
     setLeadUpdating(leadId);
@@ -770,9 +790,9 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
   // The command centre is role-aware on the server (each section only when the member's permissions already allow that data).
   // The legacy /dashboard needs the earnings permission, so a sales or lot agent used to get an error here; both are requested
   // and the overview works if EITHER succeeds. A failure of the command centre never blocks the rest of the overview.
-  const fetchCommandCentre = async (): Promise<{ data: CommandCentreData | null; failed: boolean }> => {
+  const fetchCommandCentre = async (days: number = period): Promise<{ data: CommandCentreData | null; failed: boolean }> => {
     try {
-      const body = await dealerApi.getCommandCentre();
+      const body = await dealerApi.getCommandCentre(days === 30 ? undefined : days);
       return body?.data ? { data: body.data as CommandCentreData, failed: false } : { data: null, failed: true };
     } catch (err) {
       return { data: null, failed: (err as { status?: number })?.status !== 403 };
@@ -819,6 +839,11 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
     }
   };
 
+  // (Hooks stay above the signed-out early return so the hook order never changes when the user arrives after the first render.)
+  // Each group opens and closes on its own. The group holding the active page is always opened when you navigate to it.
+  const [closedGroups, setClosedGroups] = useState<string[]>(() => { try { const v = JSON.parse(window.localStorage.getItem('kayad.dealer.navClosed') || '[]'); return Array.isArray(v) ? v.filter((x) => typeof x === 'string') : []; } catch { return []; } });
+  const toggleNavGroup = (id: string) => setClosedGroups((prev) => { const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]; try { window.localStorage.setItem('kayad.dealer.navClosed', JSON.stringify(next)); } catch { /* optional convenience */ } return next; });
+  useEffect(() => { const g = DEALER_NAV_GROUPS.find((x) => x.items.some((i) => i.id === activeSection)); if (g) setClosedGroups((prev) => (prev.includes(g.id) ? prev.filter((x) => x !== g.id) : prev)); }, [activeSection]);
   if (!user) {
     return (
       <div className="min-h-screen bg-[#F6FAF9] flex items-center justify-center">
@@ -832,25 +857,16 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
     );
   }
 
-  // Each group opens and closes on its own. The group holding the active page is always opened when you navigate to it.
-  const [closedGroups, setClosedGroups] = useState<string[]>(() => { try { const v = JSON.parse(window.localStorage.getItem('kayad.dealer.navClosed') || '[]'); return Array.isArray(v) ? v.filter((x) => typeof x === 'string') : []; } catch { return []; } });
-  const toggleNavGroup = (id: string) => setClosedGroups((prev) => { const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]; try { window.localStorage.setItem('kayad.dealer.navClosed', JSON.stringify(next)); } catch { /* optional convenience */ } return next; });
-  useEffect(() => { const g = DEALER_NAV_GROUPS.find((x) => x.items.some((i) => i.id === activeSection)); if (g) setClosedGroups((prev) => (prev.includes(g.id) ? prev.filter((x) => x !== g.id) : prev)); }, [activeSection]);
   const currentGroup = DEALER_NAV_GROUPS.find((g) => g.items.some((i) => i.id === activeSection)) || DEALER_NAV_GROUPS[0];
   const currentItem = currentGroup.items.find((i) => i.id === activeSection) || currentGroup.items[0];
   const leadBadge = dashboard?.overview?.leads?.new;
+  const invBadge = commandCentre?.listings?.total;
+  const auctionBadge = commandCentre?.auctions?.active;
+  const accountState = user?.role === 'dealer' ? (user?.status === 'approved' ? 'Active' : user?.status === 'pending' ? 'In review' : null) : 'Active';
   const compact = sidebarCollapsed && !mobileNavOpen;
 
   return (
-    <div ref={rootRef} className="min-h-screen bg-[#F6FAF9] flex flex-col lg:flex-row">
-      {user?.role === 'dealer' && user?.status === 'pending' && (
-        <div role="status" className="mx-3 mt-3 rounded-xl border border-[#D7E7E4] bg-[#EAF7F4] px-4 py-3 text-sm text-[#0A3340] lg:mx-6 lg:mt-5">
-          <strong>Business verification is in progress.</strong>
-          <p className="mb-0 mt-1 text-xs text-[#315B63]">
-            You can publish and manage your own vehicle listings after submitting the required verification details. Auction, payout and other sensitive dealer features remain restricted until verification is approved.
-          </p>
-        </div>
-      )}
+    <div ref={rootRef} className="dcc-shell min-h-screen bg-[var(--dcc-bg)] flex flex-col lg:flex-row lg:items-start">
       {/* Sidebar Navigation */}
       {/* Phone app bar: menu, where you are, notifications. Always reachable while scrolling. */}
       <div className="sticky top-0 z-40 flex items-center gap-2 border-b border-[#D7E7E4] bg-white/95 px-3 py-2 backdrop-blur lg:hidden" data-testid="dealer-mobile-bar">
@@ -858,31 +874,43 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
         <p className="min-w-0 flex-1 truncate text-center text-sm font-bold text-[#0A3340]" aria-hidden="true">{currentItem.label}</p>
       </div>
       {mobileNavOpen && <button type="button" aria-label="Close dealer menu overlay" tabIndex={-1} onClick={() => setMobileNavOpen(false)} className="fixed inset-0 z-[1090] bg-[#071F2A]/55 lg:hidden" />}
-      <aside ref={asideRef} id="dealer-workspace-sidebar" aria-label="Dealer workspace menu" className={`${mobileNavOpen ? "flex" : "hidden"} lg:flex fixed inset-y-0 left-0 z-[1100] w-[88%] max-w-sm overflow-hidden shadow-2xl lg:static lg:z-auto ${compact ? 'lg:w-[4.75rem] lg:min-w-[4.75rem]' : 'lg:w-64 lg:min-w-64'} lg:max-w-none lg:shadow-none bg-[#0A3545] text-white lg:border-r border-[#0A3545] flex-col lg:sticky lg:top-0 lg:h-[calc(100dvh-var(--dealer-aside-top,0px))]`}>
-        <div className={`border-b border-white/10 ${compact ? 'p-2' : 'p-4'}`}>
-          <div className={`flex items-center min-w-0 ${compact ? 'justify-center' : 'gap-3'}`}>
-            <div className="w-11 h-11 shrink-0 rounded-xl bg-gradient-to-br from-[#11B8A6] to-[#12D6CB] flex items-center justify-center overflow-hidden ring-1 ring-white/20">
-              {branding.logoType === 'image' && branding.logoUrl ? <img src={branding.logoUrl} alt={branding.logoText || 'KAYARD KE'} className="w-full h-full object-contain bg-white" /> : branding.logoType === 'text' ? <span className="text-xs font-black text-white">{branding.logoText || 'KAYARD KE'}</span> : <img src={branding.logoUrl || '/branding/kayad-symbol.svg'} alt={branding.logoText || 'KAYARD KE'} className="w-full h-full object-contain" onError={(event) => { event.currentTarget.style.display = 'none'; }} />}
+      <aside ref={asideRef} id="dealer-workspace-sidebar" aria-label="Dealer workspace menu" data-testid="dealer-sidebar" className={`${mobileNavOpen ? "flex" : "hidden"} lg:flex fixed inset-y-0 left-0 z-[1100] w-[88%] max-w-sm flex-col overflow-y-auto overscroll-contain shadow-2xl lg:sticky lg:top-0 lg:z-auto lg:h-dvh lg:max-w-none lg:shadow-none ${compact ? 'lg:w-[4.75rem] lg:min-w-[4.75rem]' : 'lg:w-72 lg:min-w-72 xl:w-[300px] xl:min-w-[300px]'} bg-gradient-to-b from-[#062F3A] via-[#06323D] to-[#08434C] text-white`}>
+        {/* One continuous panel: brand, identity, groups and account footer scroll together; nothing is pinned or overlaps. */}
+        <div className={`shrink-0 border-b border-white/10 ${compact ? 'p-2' : 'px-5 pb-3 pt-4'}`}>
+          <div className={`flex items-center ${compact ? 'flex-col gap-2' : 'justify-between gap-2'}`}>
+            <div className={`min-w-0 ${compact ? '' : 'flex-1'}`}>
+              {/* The brand mark is the white-wordmark variant, readable on the navy panel regardless of the site's light-theme logo setting. */}
+              <img src="/branding/kayard-ke-logo-dark.png" alt="KAYARD KE" className={`${compact ? 'h-8 w-8 object-cover object-right' : 'h-12 w-auto max-w-[210px]'} object-contain`} />
+              <p className={`mt-0.5 text-[12px] font-medium text-white/85 ${compact ? 'hidden' : ''}`}>Kenya's Trusted Vehicle Marketplace</p>
             </div>
-            <div className={`min-w-0 ${compact ? 'hidden' : ''}`}>
-              <h1 className="font-black text-white truncate">{branding.logoText || 'KAYARD KE'}</h1>
-              <p className="text-xs text-white/65 truncate">{user?.businessName || user?.name || 'Dealer account'}</p><p className="mt-0.5 text-[10px] font-black uppercase tracking-[.14em] text-[#12D6CB]">Dealer account</p>
-            </div>
-            <button type="button" data-testid="dealer-sidebar-toggle" onClick={toggleSidebar} aria-pressed={sidebarCollapsed} aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'} title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'} className={`hidden lg:inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/20 text-white/80 hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#12D6CB] ${compact ? 'mt-2' : 'ml-auto'}`}>{sidebarCollapsed ? <ChevronRight className="h-4 w-4" aria-hidden="true" /> : <ChevronLeft className="h-4 w-4" aria-hidden="true" />}</button>
+            <button type="button" data-testid="dealer-sidebar-toggle" onClick={toggleSidebar} aria-pressed={sidebarCollapsed} aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'} title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'} className="hidden lg:inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/20 text-white/80 hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#12D6CB]">{sidebarCollapsed ? <ChevronRight className="h-4 w-4" aria-hidden="true" /> : <ChevronLeft className="h-4 w-4" aria-hidden="true" />}</button>
           </div>
         </div>
 
-        <div className={`shrink-0 pt-3 ${compact ? 'px-2' : 'px-3 lg:px-4'}`}><button type="button" aria-label="Add a vehicle" title="Add a vehicle" data-testid="dealer-sidebar-add-vehicle" onClick={() => { setMobileNavOpen(false); setActiveSection('inventory'); openListingForm({ mode: 'create' }); }} className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#11B8A6] px-4 text-sm font-black text-[#062A33] shadow-sm hover:bg-[#12D6CB] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><Plus className="h-4 w-4" aria-hidden="true" />{compact ? <span className="sr-only">Add a vehicle</span> : 'Add a vehicle'}</button></div>
+        <div className={`shrink-0 border-b border-white/10 ${compact ? 'hidden' : 'px-5 py-3'}`} data-testid="dealer-sidebar-identity">
+          <div className="flex items-center gap-3">
+            <span aria-hidden="true" className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-lg font-black text-[#062F3A]">{String(user?.businessName || user?.name || 'D').trim().charAt(0).toUpperCase()}</span>
+            <div className="min-w-0 flex-1 leading-tight">
+              <p className="truncate text-[15px] font-extrabold text-white">{user?.businessName || user?.name || 'Dealer account'}</p>
+              {user?.businessName && user?.name && <p className="truncate text-[13px] text-white/75">{user.name}</p>}
+              <p className="mt-0.5 flex items-center gap-1 text-[11px] font-extrabold uppercase tracking-[.12em] text-[#12D6CB]">Dealer account{user?.role === 'dealer' && user?.status === 'approved' && <BadgeCheck className="h-3.5 w-3.5" aria-label="Verified" />}</p>
+            </div>
+          </div>
+        </div>
 
-        <nav aria-label="Dealer workspace" className={`relative flex-1 min-h-0 overflow-y-auto overscroll-contain ${compact ? 'p-2' : 'p-3 lg:p-4'}`}>
+        <div className={`shrink-0 ${compact ? 'px-2 pt-3' : 'px-5 pt-4'}`}><button type="button" aria-label="Add a vehicle" title="Add a vehicle" data-testid="dealer-sidebar-add-vehicle" onClick={() => { setMobileNavOpen(false); setActiveSection('inventory'); openListingForm({ mode: 'create' }); }} className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#12D6CB] px-4 text-[15px] font-extrabold text-[#04282F] shadow-sm hover:bg-[#2BE3D8] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><Plus className="h-5 w-5" aria-hidden="true" />{compact ? <span className="sr-only">Add a vehicle</span> : 'Add a vehicle'}</button></div>
+
+        <nav aria-label="Dealer workspace" className={`relative shrink-0 ${compact ? 'p-2' : 'px-4 py-3'}`}>
           {DEALER_NAV_GROUPS.map((group, index) => (
             <div
               key={group.id}
               role="group"
               aria-labelledby={`dealer-nav-${group.id}`}
-              className={`space-y-1 ${index > 0 ? 'mt-3 border-t border-white/10 pt-3' : ''}`}
+              className={`space-y-1 ${index > 0 ? 'mt-2 border-t border-white/10 pt-2' : ''}`}
             >
               {compact ? (
+                <p id={`dealer-nav-${group.id}`} className="sr-only">{group.label}</p>
+              ) : group.id === 'overview' ? (
                 <p id={`dealer-nav-${group.id}`} className="sr-only">{group.label}</p>
               ) : (
                 <button
@@ -892,13 +920,13 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   aria-controls={`dealer-nav-items-${group.id}`}
                   data-testid={`nav-group-${group.id}`}
                   onClick={() => toggleNavGroup(group.id)}
-                  className="flex w-full min-h-9 items-center justify-between rounded-md px-3 pb-1 text-left text-[10px] font-black uppercase tracking-[.16em] text-white/65 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#12D6CB]"
+                  className="flex w-full min-h-10 items-center justify-between rounded-md px-3 text-left text-[12px] font-extrabold uppercase tracking-[.14em] text-white/80 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#12D6CB]"
                 >
                   <span>{group.label}</span>
                   <ChevronDown className={`h-4 w-4 transition-transform ${closedGroups.includes(group.id) ? '-rotate-90' : ''}`} aria-hidden="true" />
                 </button>
               )}
-              <div id={`dealer-nav-items-${group.id}`} hidden={!compact && closedGroups.includes(group.id)} className="space-y-1">
+              <div id={`dealer-nav-items-${group.id}`} hidden={!compact && group.id !== 'overview' && closedGroups.includes(group.id)} className="space-y-0.5">
               {group.items.map((item) => (
                 <NavTab
                   key={item.id}
@@ -906,7 +934,8 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   label={item.label}
                   active={activeSection === item.id}
                   onClick={() => setActiveSection(item.id)}
-                  badge={item.id === 'leads' ? leadBadge : undefined}
+                  badge={item.id === 'leads' ? leadBadge : item.id === 'inventory' ? (invBadge || undefined) : item.id === 'auctions' ? (auctionBadge || undefined) : undefined}
+                  badgeLabel={item.id === 'leads' ? 'new' : item.id === 'inventory' ? 'vehicles' : 'live'}
                   collapsed={compact}
                 />
               ))}
@@ -915,42 +944,63 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           ))}
         </nav>
 
-        <div className={`shrink-0 border-t border-white/10 space-y-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] ${compact ? 'p-2' : 'p-3 lg:p-4'}`} data-testid="dealer-sidebar-footer">
-          {/* Collapsed by default so the menu keeps its room (DA-06); the status stays one tap away and Sign out is always visible. */}
-          <details className={`group rounded-xl border border-white/15 bg-white/10 ${compact ? 'hidden' : ''}`} data-testid="dealer-account-status-toggle">
-            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-xl px-3 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#12D6CB] [&::-webkit-details-marker]:hidden">
+        <div className={`mt-auto shrink-0 space-y-2 border-t border-white/10 pb-[max(1rem,env(safe-area-inset-bottom))] ${compact ? 'p-2' : 'px-5 pt-3'}`} data-testid="dealer-sidebar-footer">
+          {/* Collapsed by default so the menu keeps its room; the status stays one tap away and Sign out is always reachable by scrolling the one panel. */}
+          <details className={`group rounded-xl border border-white/20 bg-white/5 ${compact ? 'hidden' : ''}`} data-testid="dealer-account-status-toggle">
+            <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-2 rounded-xl px-3 text-[15px] font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#12D6CB] [&::-webkit-details-marker]:hidden">
               <span>Account status</span>
-              <span aria-hidden="true" className="text-xs text-white/70 transition group-open:rotate-180">▾</span>
+              <span className="ml-auto inline-flex items-center gap-2">{accountState && <span className="rounded-full bg-[#0A9F78] px-2.5 py-0.5 text-xs font-bold text-white">{accountState}</span>}<ChevronDown aria-hidden="true" className="h-4 w-4 text-white/80 transition group-open:rotate-180" /></span>
             </summary>
             <div className="max-h-[40vh] overflow-y-auto rounded-b-xl bg-white p-1 text-[#0A3340]"><DealerAccountStatus /></div>
           </details>
-          <button type="button" onClick={() => onNavigate?.('support')} className="w-full inline-flex min-h-11 items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-[#12D6CB] hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" data-testid="dealer-help-support" title="Help & support"><HelpCircle className={`h-4 w-4 ${compact ? '' : 'mr-2'}`} aria-hidden="true" />{compact ? <span className="sr-only">Help &amp; support</span> : 'Help & support'}</button>
+          <button type="button" onClick={() => onNavigate?.('support')} className="inline-flex min-h-11 w-full items-center justify-start gap-3 rounded-lg px-3 text-[15px] font-semibold text-[#12D6CB] hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" data-testid="dealer-help-support" title="Help & support"><HelpCircle className="h-5 w-5" aria-hidden="true" />{compact ? <span className="sr-only">Help &amp; support</span> : 'Help & support'}</button>
           {logoutError && <p role="alert" className="text-sm text-red-200">{logoutError}</p>}
-          <button type="button" onClick={handleDealerLogout} title="Sign out" className="w-full inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/20 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"><LogOut className="w-4 h-4" aria-hidden="true" />{compact ? <span className="sr-only">Sign out</span> : 'Sign out'}</button>
+          <button type="button" onClick={handleDealerLogout} title="Sign out" className="inline-flex min-h-11 w-full items-center justify-start gap-3 rounded-lg px-3 text-[15px] font-semibold text-white/90 hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><LogOut className="h-5 w-5" aria-hidden="true" />{compact ? <span className="sr-only">Sign out</span> : 'Sign out'}</button>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <div className="flex-1 min-w-0 overflow-y-auto">
-        <div className="p-3 sm:p-6 lg:p-8">
-          {/* Top bar (desktop): brand, account type, search, notifications and who is signed in. Mirrors the phone app bar. */}
-          <div className="mb-4 hidden items-center gap-4 border-b border-[#D7E7E4] pb-3 lg:flex" data-testid="dealer-topbar">
-            <div className="flex shrink-0 items-center gap-2"><span className="text-lg font-black text-[#0A3340]">{branding.logoText || 'KAYARD KE'}</span><span className="rounded-full bg-[#DDF5F1] px-2.5 py-1 text-xs font-bold text-[#0E6F68]">Dealer Account</span></div>
-            <form role="search" aria-label="Search your vehicles" className="ml-auto flex min-w-0 max-w-md flex-1 items-center gap-2 rounded-xl border border-[#D7E7E4] bg-white px-3" onSubmit={(e) => { e.preventDefault(); setInvQuery(searchText); setInvStatus('all'); setActiveSection('inventory'); }}>
-              <Search className="h-4 w-4 shrink-0 text-[#64748B]" aria-hidden="true" />
-              <input type="search" value={searchText} onChange={(e) => setSearchText(e.target.value)} aria-label="Search your vehicles" placeholder="Search your vehicles by make, model, year or city" className="min-h-10 w-full min-w-0 bg-transparent text-sm text-[#0A3340] outline-none placeholder:text-[#64748B]" />
-            </form>
-            <div className="flex shrink-0 items-center gap-2 rounded-xl border border-[#D7E7E4] bg-white py-1 pl-1 pr-3" data-testid="dealer-identity">
-              <span aria-hidden="true" className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#0A3545] text-sm font-black text-white">{String(user?.businessName || user?.name || 'D').trim().charAt(0).toUpperCase()}</span>
-              <span className="min-w-0 leading-tight"><span className="block max-w-[10rem] truncate text-sm font-bold text-[#0A3340]">{user?.businessName || user?.name || 'Dealer account'}</span>{user?.businessName && user?.name && <span className="block max-w-[10rem] truncate text-xs text-[#64748B]">{user.name}</span>}</span>
-            </div>
+      {/* Main Content: the page scrolls as one document beside the sticky sidebar. */}
+      <div className="min-w-0 flex-1">
+        {/* Top bar (desktop): search, help, notifications and who is signed in. Full width, sticky, flush with the top of the workspace. */}
+        <div className="sticky top-0 z-30 hidden h-16 items-center gap-3 border-b border-[var(--dcc-border)] bg-white px-6 lg:flex xl:px-8" data-testid="dealer-topbar">
+          <form role="search" aria-label="Search your vehicles" className="flex min-w-0 max-w-[640px] flex-1 items-center gap-2 rounded-xl border border-[var(--dcc-border)] bg-white px-3 focus-within:border-[var(--dcc-teal-2)]" onSubmit={(e) => { e.preventDefault(); setInvQuery(searchText); setInvStatus('all'); setActiveSection('inventory'); }}>
+            <Search className="h-4 w-4 shrink-0 text-[#44566A]" aria-hidden="true" />
+            <input ref={searchInputRef} type="search" value={searchText} onChange={(e) => setSearchText(e.target.value)} aria-label="Search your vehicles" aria-keyshortcuts="Control+K" placeholder="Search your vehicles by make, model, year or city" className="min-h-11 w-full min-w-0 bg-transparent text-sm text-[#0A3340] outline-none placeholder:text-[#5B6B7A]" />
+            <kbd aria-hidden="true" className="hidden shrink-0 rounded-md border border-[var(--dcc-border)] bg-[#F1F5F8] px-1.5 py-0.5 text-[11px] font-semibold text-[#334155] xl:inline">Ctrl K</kbd>
+          </form>
+          <div className="ml-auto flex shrink-0 items-center gap-2">
+            <button type="button" aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'} data-testid="dealer-topbar-bell" onClick={() => { window.location.assign('/notifications'); }} className="dcc-focus relative flex h-11 w-11 items-center justify-center rounded-xl text-[#334155] hover:bg-[#F1F5F8]"><Bell className="h-5 w-5" aria-hidden="true" />{unreadCount > 0 && <span aria-hidden="true" className="absolute right-0.5 top-0.5 min-w-[18px] rounded-full bg-[#E5484D] px-1 text-center text-[11px] font-bold leading-[18px] text-white">{unreadCount > 99 ? '99+' : unreadCount}</span>}</button>
+            <button type="button" aria-label="Help and support" title="Help & support" data-testid="dealer-topbar-help" onClick={() => onNavigate?.('support')} className="dcc-focus flex h-11 w-11 items-center justify-center rounded-xl text-[#334155] hover:bg-[#F1F5F8]"><HelpCircle className="h-5 w-5" aria-hidden="true" /></button>
+            <details className="relative" data-testid="dealer-identity">
+              <summary className="dcc-focus flex min-h-11 cursor-pointer list-none items-center gap-3 rounded-xl border-l border-[var(--dcc-border)] py-1 pl-4 pr-2 [&::-webkit-details-marker]:hidden" aria-label="Account menu">
+                <span aria-hidden="true" className="flex h-10 w-10 items-center justify-center rounded-full bg-[#062F3A] text-sm font-black text-white">{String(user?.name || user?.businessName || 'D').trim().charAt(0).toUpperCase()}</span>
+                <span className="min-w-0 text-left leading-tight"><span className="block max-w-[10rem] truncate text-sm font-bold text-[#0A3340]">{user?.name || user?.businessName || 'Dealer account'}</span><span className="block text-xs text-[#44566A]">Dealer Account</span></span>
+                <ChevronDown className="h-4 w-4 text-[#44566A]" aria-hidden="true" />
+              </summary>
+              <div role="menu" className="absolute right-0 z-40 mt-2 w-56 rounded-xl border border-[var(--dcc-border)] bg-white p-1 shadow-lg">
+                <button type="button" role="menuitem" onClick={() => setActiveSection('settings')} className="dcc-focus block min-h-11 w-full rounded-lg px-3 text-left text-sm hover:bg-[#F1F5F8]">Business profile &amp; settings</button>
+                <button type="button" role="menuitem" onClick={() => setActiveSection('team')} className="dcc-focus block min-h-11 w-full rounded-lg px-3 text-left text-sm hover:bg-[#F1F5F8]">Team &amp; Permissions</button>
+                <button type="button" role="menuitem" onClick={handleDealerLogout} className="dcc-focus block min-h-11 w-full rounded-lg px-3 text-left text-sm hover:bg-[#F1F5F8]">Sign out</button>
+              </div>
+            </details>
           </div>
+        </div>
+        <div className="p-3 sm:px-6 sm:py-5 lg:px-6 lg:py-4 xl:px-8">
+      {user?.role === 'dealer' && user?.status === 'pending' && (
+        <div role="status" className="mb-4 rounded-xl border border-[#D7E7E4] bg-[#EAF7F4] px-4 py-3 text-sm text-[#0A3340]">
+          <strong>Business verification is in progress.</strong>
+          <p className="mb-0 mt-1 text-xs text-[#315B63]">
+            You can publish and manage your own vehicle listings after submitting the required verification details. Auction, payout and other sensitive dealer features remain restricted until verification is approved.
+          </p>
+        </div>
+      )}
+
           {/* Header */}
-          <div className="relative mb-5 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <div className="relative mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
             <div className="min-w-0 pr-12 sm:pr-0">
-              <nav aria-label="Breadcrumb" className="mb-1 flex flex-wrap items-center gap-1 text-xs text-[#64748B]">
+              <nav aria-label="Breadcrumb" className="mb-0.5 flex flex-wrap items-center gap-1 text-xs text-[#44566A]">
                 {activeSection === 'overview' ? (
-                  <span aria-current="page">Dealer Hub</span>
+                  <span aria-current="page" className="text-[11px] font-extrabold uppercase tracking-[.14em] text-[#087E7B]">Dealer Hub</span>
                 ) : (
                   <>
                     <button type="button" onClick={() => setActiveSection('overview')} className="inline-flex min-h-6 items-center gap-1 font-medium text-[#176B87] hover:text-[#12576D] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87]">
@@ -963,26 +1013,35 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   </>
                 )}
               </nav>
-              <h2 className="text-xl font-bold text-[#0A3340] sm:text-2xl">{currentItem.title}</h2>
-              <p className="text-sm text-[#64748B] sm:text-base">{activeSection === 'overview' ? `Welcome back, ${user?.name || 'dealer'}${user?.businessName ? ` · ${user.businessName}` : ''}` : currentItem.description}</p>
-              {activeSection === 'overview' && (
+              <h2 className="text-2xl font-extrabold leading-tight text-[#0A3340] sm:text-[28px]">{currentItem.title}</h2>
+              <p className="text-sm text-[#44566A] sm:text-[15px]">{activeSection === 'overview' ? `Welcome back, ${user?.name || 'dealer'} — manage your inventory, leads, sales and business in one place.` : currentItem.description}</p>
+              {activeSection === 'overview' && ((user?.role === 'dealer' && user?.status === 'approved') || user?.city || user?.location) && (
                 <p className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#475569]" data-testid="dealer-header-meta">
                   {user?.role === 'dealer' && user?.status === 'approved' && <span className="inline-flex items-center gap-1 rounded-full bg-[#DDF5F1] px-2.5 py-1 font-bold text-[#0E6F68]" data-testid="dealer-verified-chip"><BadgeCheck className="h-3.5 w-3.5" aria-hidden="true" />Verified Dealer</span>}
-                  <span className="inline-flex items-center gap-1"><Calendar className="h-3.5 w-3.5" aria-hidden="true" />{new Date().toLocaleDateString('en-KE', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}</span>
                   {(user?.city || user?.location) && <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" aria-hidden="true" />{user?.city || user?.location}</span>}
                 </p>
               )}
             </div>
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="hidden items-center rounded-xl border border-[#D7E7E4] bg-white p-1 sm:inline-flex" aria-label="Page history">
-                <button type="button" aria-label="Go to previous page" title="Previous page" onClick={() => window.history.back()} className="inline-flex min-h-8 min-w-8 shrink-0 items-center justify-center rounded-lg p-2 text-[#176B87] hover:bg-[#EEF7F5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"><ChevronLeft className="h-4 w-4" /></button>
-                <button type="button" aria-label="Go to next page" title="Next page" onClick={() => window.history.forward()} className="inline-flex min-h-8 min-w-8 shrink-0 items-center justify-center rounded-lg p-2 text-[#176B87] hover:bg-[#EEF7F5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"><ChevronRight className="h-4 w-4" /></button>
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              {activeSection === 'overview' && (
+                <>
+                  <span className="hidden items-center gap-1.5 whitespace-nowrap text-sm font-medium text-[#334155] md:inline-flex" data-testid="dealer-header-date"><Calendar className="h-4 w-4" aria-hidden="true" />{new Date().toLocaleDateString('en-KE', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                  <span aria-hidden="true" className="hidden h-6 w-px bg-[var(--dcc-border)] md:block" />
+                  <label className="sr-only" htmlFor="dealer-period">Reporting period</label>
+                  <select id="dealer-period" data-testid="dealer-period" value={period} onChange={(e) => setPeriod(Number(e.target.value) as PeriodDays)} className="dcc-focus min-h-11 rounded-xl border border-[var(--dcc-border)] bg-white px-3 text-sm font-semibold text-[var(--dcc-ink)]">
+                    {PERIOD_OPTIONS.map((o) => <option key={o.days} value={o.days}>{o.label}</option>)}
+                  </select>
+                </>
+              )}
+              <div className={`${activeSection === 'overview' ? 'hidden max-md:inline-flex sm:max-md:inline-flex' : 'hidden sm:inline-flex'} items-center rounded-xl border border-[var(--dcc-border)] bg-white p-1`} aria-label="Page history">
+                <button type="button" aria-label="Go to previous page" title="Previous page" onClick={() => window.history.back()} className="inline-flex min-h-8 min-w-8 shrink-0 items-center justify-center rounded-lg p-2 text-[#176B87] hover:bg-[#EEF7F5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"><ChevronLeft className="h-4 w-4" aria-hidden="true" /></button>
+                <button type="button" aria-label="Go to next page" title="Next page" onClick={() => window.history.forward()} className="inline-flex min-h-8 min-w-8 shrink-0 items-center justify-center rounded-lg p-2 text-[#176B87] hover:bg-[#EEF7F5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"><ChevronRight className="h-4 w-4" aria-hidden="true" /></button>
               </div>
-              <button type="button" aria-label="Notifications" className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center sm:static sm:h-auto sm:w-auto p-2 bg-white border border-[#D7E7E4] rounded-xl hover:bg-[#F6FAF9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87]" onClick={() => { window.location.assign('/notifications'); }}>
-                <Bell className="w-5 h-5 text-[#64748B]" aria-hidden="true" />
+              <button type="button" aria-label="Notifications" data-testid="dealer-header-bell" className="lg:hidden absolute right-0 top-0 flex h-11 w-11 items-center justify-center sm:static rounded-xl border border-[var(--dcc-border)] bg-white hover:bg-[#F6FAF9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87]" onClick={() => { window.location.assign('/notifications'); }}>
+                <Bell className="w-5 h-5 text-[#44566A]" aria-hidden="true" />
               </button>
-              {activeSection !== 'inventory' && (
-                <button type="button" onClick={() => setActiveSection('inventory')} className={`${activeSection === 'overview' ? 'flex' : 'hidden sm:flex'} min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#176B87] px-4 py-2 font-medium text-white hover:bg-[#12576D] sm:w-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]`}>
+              {activeSection !== 'inventory' && activeSection !== 'overview' && (
+                <button type="button" onClick={() => setActiveSection('inventory')} className="hidden min-h-11 items-center justify-center gap-2 rounded-xl bg-[#176B87] px-4 py-2 font-medium text-white hover:bg-[#12576D] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87] sm:flex">
                   <Car className="w-5 h-5" aria-hidden="true" />
                   Manage Inventory
                 </button>
@@ -1021,26 +1080,16 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
             const performers = Array.isArray(dashboard?.topPerformers?.vehicles) ? dashboard.topPerformers.vehicles : [];
             return (
             <div data-testid="dealer-overview">
-              {/* Command-centre banner: same dark treatment as the personal dashboard; only real counts, never invented. */}
-              <section aria-label="Dealership command centre" data-testid="dealer-command-banner" className="mb-5 overflow-hidden rounded-2xl bg-gradient-to-br from-[#0A3545] to-[#0E7C74] p-4 text-white shadow-sm sm:mb-6 sm:p-6">
-                <p className="text-[11px] font-black uppercase tracking-[.16em] text-[#12D6CB]">KAYARD KE · Dealer account</p>
-                <h2 className="mt-1 text-2xl font-black sm:text-3xl">Run your dealership from one place</h2>
-                <p className="mt-1 max-w-2xl text-sm text-white/80">Inventory, enquiries, sales and your team — all in one secure workspace.</p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <button type="button" onClick={() => openListingForm({ mode: 'create' })} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#11B8A6] px-4 text-sm font-black text-[#062A33] hover:bg-[#12D6CB]"><Plus className="h-4 w-4" aria-hidden="true" />Add a vehicle</button>
-                  <button type="button" onClick={() => setActiveSection('leads')} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 text-sm font-bold hover:bg-white/20"><MessageSquare className="h-4 w-4" aria-hidden="true" />Leads{newLeads ? ` (${newLeads} new)` : ''}</button>
-                  <button type="button" onClick={() => setActiveSection('auctions')} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 text-sm font-bold hover:bg-white/20"><Gavel className="h-4 w-4" aria-hidden="true" />Auctions</button>
-                  <button type="button" onClick={() => setActiveSection('banking')} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 text-sm font-bold hover:bg-white/20"><Landmark className="h-4 w-4" aria-hidden="true" />Payouts</button>
-                </div>
-                {dataReady && !commandCentre && ((newLeads ?? 0) > 0 || (st?.pending ?? 0) > 0 || (st?.draft ?? 0) > 0) && (
-                  <ul className="mt-4 grid gap-2 sm:grid-cols-3" data-testid="dealer-attention" aria-label="Needs your attention">
-                    {(newLeads ?? 0) > 0 && <li><button type="button" onClick={() => setActiveSection('leads')} className="w-full rounded-xl bg-white/10 px-3 py-2 text-left text-sm hover:bg-white/20"><strong className="block text-lg font-black">{newLeads}</strong>new {newLeads === 1 ? 'enquiry' : 'enquiries'} awaiting reply</button></li>}
-                    {(st?.pending ?? 0) > 0 && <li><button type="button" onClick={() => setActiveSection('inventory')} className="w-full rounded-xl bg-white/10 px-3 py-2 text-left text-sm hover:bg-white/20"><strong className="block text-lg font-black">{st?.pending}</strong>listing{st?.pending === 1 ? '' : 's'} pending review</button></li>}
-                    {(st?.draft ?? 0) > 0 && <li><button type="button" onClick={() => setActiveSection('inventory')} className="w-full rounded-xl bg-white/10 px-3 py-2 text-left text-sm hover:bg-white/20"><strong className="block text-lg font-black">{st?.draft}</strong>draft{st?.draft === 1 ? '' : 's'} to finish and publish</button></li>}
-                  </ul>
-                )}
-              </section>
-              <CommandCentrePanel data={commandCentre} loading={loading} unavailable={commandCentreFailed} onOpen={(section) => setActiveSection(section)} onRetry={loadDashboard} />
+              <DealerOverview
+                data={commandCentre as any} loading={loading || periodLoading} days={period}
+                verification={user?.role === 'dealer' ? (user?.status === 'approved' ? 'approved' : user?.status === 'pending' ? 'review' : 'unknown') : 'unknown'}
+                onOpen={(section) => setActiveSection(section)} onAdd={() => openListingForm({ mode: 'create' })} onEdit={(id) => openListingForm({ mode: 'edit', id })}
+                listings={myListings as any} listingsState={listingsError ? 'error' : listingsLoaded ? 'ready' : 'loading'} onRetryListings={() => setListingsRetry((n) => n + 1)}
+                leads={leads as any} leadsState={leadsError ? 'error' : leadsLoaded ? 'ready' : 'loading'} onRetryLeads={loadLeads}
+                onTab={() => { /* the tab choice is local to the table */ }}
+              />
+              <div className="mt-4" />
+              <CommandCentrePanel hideAttention data={commandCentre} loading={loading} unavailable={commandCentreFailed} onOpen={(section) => setActiveSection(section)} onRetry={loadDashboard} />
               {/* Business summary: real figures only. "—" = unavailable, 0 = a genuine zero, skeleton = still loading. */}
               <div className="mb-5 grid grid-cols-1 gap-3 min-[460px]:grid-cols-2 sm:mb-6 sm:gap-4 xl:grid-cols-4">
                 <StatCard title="Total Listings" loading={loading} onOpen={() => setActiveSection('inventory')} openLabel="Open inventory" value={ov?.totalListings ?? '—'} caption={listingCaption} icon={Car} />

@@ -45,8 +45,9 @@ describe('Dealer launch UI', () => {
     renderIt();
     expect(await screen.findByRole('heading', { level: 2, name: 'Dealer Command Centre' })).toBeTruthy();
     expect(screen.getByTestId('dealer-verified-chip').textContent).toContain('Verified Dealer');
-    expect(screen.getByTestId('dealer-identity').textContent).toContain('ABC Motors');
-    expect(screen.getByText('Inventory, enquiries, sales and your team — all in one secure workspace.')).toBeTruthy();
+    expect(screen.getByTestId('dealer-sidebar-identity').textContent).toContain('ABC Motors');
+    expect(screen.getByTestId('dealer-identity').textContent).toContain('Eric Kamau');
+    expect(screen.getByText('Inventory, enquiries, auctions, payouts and your team — all secure and connected.')).toBeTruthy();
   });
 
   it('does not show the Verified chip for a dealer who is still pending', async () => {
@@ -62,7 +63,7 @@ describe('Dealer launch UI', () => {
     fireEvent.click(toggle);
     expect(toggle.getAttribute('aria-pressed')).toBe('true');
     expect(within(nav).getAllByRole('button')).toHaveLength(15);
-    expect(within(nav).getByRole('button', { name: 'Team & Employment' })).toBeTruthy();
+    expect(within(nav).getByRole('button', { name: 'Team & Permissions' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Sign out' })).toBeTruthy();
     fireEvent.click(toggle);
     expect(toggle.getAttribute('aria-pressed')).toBe('false');
@@ -139,7 +140,7 @@ describe('Dealer launch UI', () => {
     renderIt();
     const nav = await screen.findByRole('navigation', { name: 'Dealer workspace' });
     const sales = within(nav).getByTestId('nav-group-sales');
-    const people = within(nav).getByTestId('nav-group-people');
+    const people = within(nav).getByTestId('nav-group-business');
     expect(sales.getAttribute('aria-expanded')).toBe('true');
     fireEvent.click(sales);
     expect(sales.getAttribute('aria-expanded')).toBe('false');
