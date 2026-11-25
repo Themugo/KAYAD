@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-const api = vi.hoisted(() => ({ getTeamRoles: vi.fn(), inviteTeamMember: vi.fn(), updateTeamMember: vi.fn(), removeTeamMember: vi.fn(), resendTeamInvite: vi.fn(), createTeamRole: vi.fn(), updateTeamRole: vi.fn(), deleteTeamRole: vi.fn(), getEmploymentRecords: vi.fn(), getCommandCentre: vi.fn() }));
+const api = vi.hoisted(() => ({ getTeamRoles: vi.fn(), inviteTeamMember: vi.fn(), updateTeamMember: vi.fn(), removeTeamMember: vi.fn(), resendTeamInvite: vi.fn(), createTeamRole: vi.fn(), updateTeamRole: vi.fn(), resetTeamRole: vi.fn(), deleteTeamRole: vi.fn(), getEmploymentRecords: vi.fn(), getCommandCentre: vi.fn() }));
 vi.mock('../../../services/dealerPlatformApi', () => api);
 import DealerTeamPanel from '../../../pages/dealer/dashboard/DealerTeamPanel';
 
@@ -71,12 +71,29 @@ describe('Team: invitations and e-mail honesty', () => {
 });
 
 describe('Team: roles tab', () => {
+  it('lets the owner edit a built-in role and reset it to default; Basic Staff Access has no edit', async () => {
+    api.getTeamRoles.mockResolvedValue({ success: true, data: { customRolesAvailable: true, permissions: perms, roles: [
+      { key: 'basic_staff', label: 'Basic Staff Access', builtin: true, onboarding: true, locked: true, permissions: {} },
+      { key: 'sales_agent', label: 'Sales agent', builtin: true, customised: true, permissions: { canListCars: true, canChatBuyers: false } }] } });
+    api.updateTeamRole.mockResolvedValue({ success: true, updatedMembers: 2, keptCustom: 1, data: { key: 'sales_agent' } });
+    api.resetTeamRole.mockResolvedValue({ success: true, updatedMembers: 0, data: { key: 'sales_agent' } });
+    await open();
+    expect(screen.queryByRole('button', { name: 'Edit role Basic Staff Access' })).toBeNull();
+    await userEvent.click(await screen.findByRole('button', { name: 'Edit role Sales agent' }));
+    await userEvent.click(screen.getByLabelText('Chat with buyers and handle leads'));
+    await userEvent.click(screen.getByRole('button', { name: 'Save role' }));
+    await waitFor(() => expect(api.updateTeamRole).toHaveBeenCalledWith('sales_agent', expect.objectContaining({ permissions: { canListCars: true, canChatBuyers: true } })));
+    expect(await screen.findByText(/2 members now have the new permissions.*1 member with individually adjusted access kept/i)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Reset role Sales agent to default' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Confirm reset' }));
+    await waitFor(() => expect(api.resetTeamRole).toHaveBeenCalledWith('sales_agent'));
+  });
   const open = async () => { render(<DealerTeamPanel team={[]} onChanged={onChanged} />); await userEvent.click(await screen.findByRole('tab', { name: 'Roles & Permissions' })); };
-  it('lists built-in roles as fixed and lets the owner create a custom role from permission checkboxes', async () => {
+  it('lists built-in roles as editable and lets the owner create a custom role from permission checkboxes', async () => {
     api.createTeamRole.mockResolvedValue({ success: true, data: { key: 'custom_clerk' } });
     await open();
     await waitFor(() => expect(screen.getByRole('button', { name: 'Create a custom role' })).toBeEnabled());
-    expect(screen.queryByRole('button', { name: 'Edit role Sales agent' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Edit role Sales agent' })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Create a custom role' }));
     await userEvent.click(screen.getByRole('button', { name: 'Save role' }));
     expect(await screen.findByText(/name of at least 2 characters/i)).toBeInTheDocument();

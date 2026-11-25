@@ -612,7 +612,9 @@ export async function createCar(payload: CreateCarPayload, options: { idempotenc
   const formData = new FormData();
   const { images, ...scalarFields } = payload;
   Object.entries(scalarFields).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') {
+    if (Array.isArray(value)) {
+      value.forEach((item) => { if (item !== '') formData.append(key, String(item)); });
+    } else if (value !== undefined && value !== null && value !== '') {
       formData.append(key, String(value));
     }
   });

@@ -18,6 +18,7 @@ export default function StaffDetail({ member, roles, employmentAvailable, onClos
   const [ending, setEnding] = useState<null | 'terminate' | 'resign'>(null);
   const [reason, setReason] = useState('');
   const [reasonError, setReasonError] = useState<string | null>(null);
+  const [editPerms, setEditPerms] = useState<Record<string, boolean> | null>(null);
   const headRef = useRef<HTMLHeadingElement>(null);
   const name = memberName(member);
   const st = displayStatus(member);
@@ -41,6 +42,12 @@ export default function StaffDetail({ member, roles, employmentAvailable, onClos
   };
 
   const applyRole = () => run(() => dealerApi.updateTeamMember(member.id, { role }), role === 'basic_staff' ? `${name} now has Basic Staff Access only.` : `${name} is now ${roles.find((r) => r.key === role)?.label || role}.`);
+  const startEditPerms = () => setEditPerms(Object.fromEntries((detail?.effectivePermissions || []).map((p: any) => [p.key, Boolean(p.granted)])));
+  const savePerms = async () => {
+    if (!editPerms) return;
+    const ok = await run(() => dealerApi.updateTeamMember(member.id, { permissions: editPerms }), `${name}’s access was updated. It applies from the very next request.`);
+    if (ok) setEditPerms(null);
+  };
   const saveBiz = () => run(() => dealerApi.setMemberBusinessEmail(member.id, bizEmail.trim()), bizEmail.trim() ? 'Business e-mail recorded.' : 'Business e-mail cleared.');
   const act = (action: 'suspend' | 'reinstate') => run(() => (employmentAvailable ? dealerApi.applyEmploymentAction(member.id, { action }) : dealerApi.updateTeamMember(member.id, { status: action === 'suspend' ? 'suspended' : 'active' })), action === 'suspend' ? `${name} suspended. They have no dealership access.` : `${name} reinstated.`);
   const endEmployment = async () => {
@@ -56,6 +63,8 @@ export default function StaffDetail({ member, roles, employmentAvailable, onClos
   const perms: { key: string; label: string; granted: boolean }[] = detail?.effectivePermissions || [];
   const identity = detail?.identity;
   const events: any[] = detail?.events || [];
+  const roleDef = roles.find((r) => r.key === member.role);
+  const customised = Boolean(roleDef) && perms.length > 0 && perms.some((p) => Boolean(roleDef!.permissions?.[p.key]) !== p.granted);
   const protectedMsg = error && /protected|cannot change|owner/i.test(error);
 
   return (
@@ -99,6 +108,29 @@ export default function StaffDetail({ member, roles, employmentAvailable, onClos
           </ul>
         )}
         {perms.length > 0 && perms.every((p) => !p.granted) && <p className="mt-1 text-xs text-[#475569]">Basic access: this person can only see their own staff profile.</p>}
+        {perms.length > 0 && member.status !== 'removed' && (
+          editPerms === null ? (
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <button type="button" className={btnCls} disabled={busy} onClick={startEditPerms}>Adjust this person’s access</button>
+              {customised && <span className="text-xs text-[#7A4B00]" data-testid="custom-access-note">Custom access: differs from the {member.roleLabel || member.role} role.</span>}
+            </div>
+          ) : (
+            <fieldset className="mt-2 rounded-lg border border-[#D7E7E4] bg-[#F6FAF9] p-3 space-y-2" aria-label={`Adjust access for ${name}`}>
+              <legend className="px-1 text-xs font-bold text-[#0A3340]">Choose exactly what {name} can do</legend>
+              {perms.map((p) => (
+                <label key={p.key} className="flex items-center gap-2 text-sm text-[#0A3340]">
+                  <input type="checkbox" checked={Boolean(editPerms[p.key])} disabled={busy} onChange={(e) => setEditPerms({ ...editPerms, [p.key]: e.target.checked })} />
+                  {p.label}
+                </label>
+              ))}
+              <p className="text-[11px] text-[#64748B]">This changes only {name}; the role and everyone else stay as they are. Moving them to another role later replaces these choices with that role’s permissions.</p>
+              <div className="flex gap-2">
+                <button type="button" className={primaryBtnCls} disabled={busy} onClick={savePerms}>Save access</button>
+                <button type="button" className={btnCls} disabled={busy} onClick={() => setEditPerms(null)}>Cancel</button>
+              </div>
+            </fieldset>
+          )
+        )}
       </div>
 
       {accepted && member.status === 'active' && <TemporaryDuties memberId={member.id} memberName={name} onChanged={onChanged} />}

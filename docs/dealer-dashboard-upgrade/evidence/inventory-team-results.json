@@ -1,0 +1,42 @@
+[
+ {
+  "name": "listing exists to edit",
+  "pass": true
+ },
+ {
+  "name": "edit: Add photos control is enabled",
+  "pass": true
+ },
+ {
+  "name": "edit: Add photos is a visible button (>=44px tall)",
+  "pass": true
+ },
+ {
+  "name": "edit: choosing a photo uploads it immediately (no second step)",
+  "pass": true
+ },
+ {
+  "name": "edit: save with body type and features succeeds",
+  "pass": true
+ },
+ {
+  "name": "roles: every role except Basic Staff Access has Edit",
+  "pass": true
+ },
+ {
+  "name": "roles: built-in Viewer saved and shows as customised",
+  "pass": true
+ },
+ {
+  "name": "roles: reset to default restores Viewer",
+  "pass": true
+ },
+ {
+  "name": "staff: per-person permission editor opens with all 8 permissions",
+  "pass": true
+ },
+ {
+  "name": "no page errors",
+  "pass": true
+ }
+]

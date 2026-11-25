@@ -20,6 +20,7 @@ import { formatThousands, parseFormattedNumber, handleFormattedInput } from '../
  */
 
 export const LISTING_FUELS: string[] = [...FUEL_TYPES];
+export const LISTING_BODY_TYPES = ['Sedan', 'Hatchback', 'SUV', 'Station Wagon', 'Pickup', 'Van', 'Coupe', 'Convertible', 'Minibus', 'Truck'];
 export const LISTING_TRANSMISSIONS = ['Automatic', 'Manual', 'CVT', 'Dual-Clutch'];
 // Kenyan market terms. A listing saved earlier with an old value still shows it (see withCurrent below).
 export const LISTING_CONDITIONS: string[] = [...CONDITIONS];
@@ -37,6 +38,8 @@ interface FormState {
   color: string;
   condition: string;
   city: string;
+  bodyType: string;
+  features: string;
   description: string;
 }
 
@@ -44,7 +47,7 @@ type FieldErrors = Partial<Record<keyof FormState | 'images', string>>;
 
 const EMPTY: FormState = {
   title: '', brand: '', model: '', year: '', price: '', mileage: '',
-  fuel: '', transmission: '', color: '', condition: '', city: '', description: '',
+  fuel: '', transmission: '', color: '', condition: '', city: '', bodyType: '', features: '', description: '',
 };
 
 function fromCar(car: BackendCar): FormState {
@@ -54,6 +57,8 @@ function fromCar(car: BackendCar): FormState {
     year: str(car.year), price: formatThousands(car.price), mileage: formatThousands(car.mileage),
     fuel: str(car.fuel).toLowerCase() === 'gasoline' ? 'Petrol' : str(car.fuel), transmission: str(car.transmission), color: str(car.color),
     condition: str(car.condition), city: str(car.city ?? car.location_city),
+    bodyType: str(car.bodyType ?? car.body_type),
+    features: Array.isArray(car.features) ? car.features.join('\n') : '',
     description: str(car.description),
   };
 }
@@ -82,6 +87,9 @@ export function validateListing(form: FormState, mode: 'create' | 'edit', imageC
     if (m === undefined || !Number.isFinite(m) || m < 0) errors.mileage = 'Mileage cannot be negative.';
     else if (m > 2_000_000) errors.mileage = 'Mileage must not exceed 2,000,000 km.';
   }
+  const feats = form.features.split(/\r?\n/).map((f) => f.trim()).filter(Boolean);
+  if (feats.length > 50) errors.features = 'List at most 50 features.';
+  else if (feats.some((f) => f.length > 200)) errors.features = 'Each feature must be 200 characters or fewer.';
   if (form.description.length > 5000) errors.description = 'Description must be 5000 characters or fewer.';
   if (mode === 'create') {
     if (imageCount < 1) errors.images = 'Add at least one photo.';
@@ -104,6 +112,8 @@ function toPayload(form: FormState): CreateCarPayload {
     color: form.color.trim() || undefined,
     condition: form.condition || undefined,
     city: form.city.trim() || undefined,
+    bodyType: form.bodyType.trim() || undefined,
+    features: form.features.split(/\r?\n/).map((f) => f.trim()).filter(Boolean),
     description: form.description.trim() || undefined,
   };
 }
@@ -155,8 +165,11 @@ const DealerListingForm: React.FC<DealerListingFormProps> = ({ mode, car, onSave
   const submittingRef = useRef(false);
   const submissionNonce = useRef(newSubmissionNonce());
   const errorRef = useRef<HTMLDivElement>(null);
+  const firstSync = useRef(false);
 
-  useEffect(() => { setForm(initial); setDirty(false); setErrors({}); setServerError(null); }, [initial]);
+  useEffect(() => {
+    if (!firstSync.current) { firstSync.current = true; return; } // the form already starts from `initial`; re-syncing on mount could overwrite an early edit
+    setForm(initial); setDirty(false); setErrors({}); setServerError(null); }, [initial]);
 
   useEffect(() => {
     if (!dirty) return undefined;
@@ -166,7 +179,8 @@ const DealerListingForm: React.FC<DealerListingFormProps> = ({ mode, car, onSave
   }, [dirty]);
 
   const set = (key: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setForm((prev) => ({ ...prev, [key]: e.target.value }));
+    const { value } = e.target; // read now: a functional updater runs after React has restored a controlled <select>
+    setForm((prev) => ({ ...prev, [key]: value }));
     setDirty(true);
   };
 
@@ -277,6 +291,17 @@ const DealerListingForm: React.FC<DealerListingFormProps> = ({ mode, car, onSave
         <Field id="listing-city" label="City">
           <input id="listing-city" className={inputCls} value={form.city} onChange={set('city')} disabled={submitting} />
         </Field>
+        <Field id="listing-bodyType" label="Body type">
+          <select id="listing-bodyType" className={inputCls} value={form.bodyType} onChange={set('bodyType')} disabled={submitting}>
+            <option value="">Not specified</option>
+            {withCurrent(LISTING_BODY_TYPES, form.bodyType).map((o) => <option key={o} value={o}>{o}</option>)}
+          </select>
+        </Field>
+        <div className="sm:col-span-2">
+          <Field id="listing-features" label="Features" error={err('features')} hint="One per line, for example “Sunroof” or “Leather seats”.">
+            <textarea id="listing-features" rows={4} className={inputCls} value={form.features} onChange={set('features')} disabled={submitting} {...aria('features', true)} />
+          </Field>
+        </div>
         <div className="sm:col-span-2">
           <Field id="listing-description" label="Description" error={err('description')} hint={`${form.description.length}/5000`}>
             <textarea id="listing-description" rows={5} className={inputCls} value={form.description} onChange={set('description')} disabled={submitting} {...aria('description', true)} />

@@ -34,6 +34,7 @@ export const resendTeamInvite = (memberId) => api.post(`/dealer-platform/team/${
 export const getTeamRoles = () => api.get('/dealer-platform/team/roles').then(r => r.data);
 export const createTeamRole = (body) => api.post('/dealer-platform/team/roles', body).then(r => r.data);
 export const updateTeamRole = (key, body) => api.put(`/dealer-platform/team/roles/${encodeURIComponent(key)}`, body).then(r => r.data);
+export const resetTeamRole = (key) => api.post(`/dealer-platform/team/roles/${encodeURIComponent(key)}/reset`).then(r => r.data);
 export const deleteTeamRole = (key) => api.delete(`/dealer-platform/team/roles/${encodeURIComponent(key)}`).then(r => r.data);
 // Public, read-only: what is this invitation link? (POST so the token never appears in a URL or access log.)
 export const previewTeamInvitation = (token) => api.post('/dealer-platform/team/invitation/preview', { token }).then(r => r.data);
